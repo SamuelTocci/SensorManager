@@ -1,0 +1,17 @@
+#include  <stdio.h>
+
+int a = 0;
+float b = 0;
+double c = 0;
+//void d = 0;
+int *p = NULL;
+
+//int, float, double, void, andpointer
+
+int main() {
+   printf("%d\n", sizeof(*p));
+printf("%dsudo apt install linux-modules-extra-5.8.0-50-generic)
+
+   return 0;
+}
+
