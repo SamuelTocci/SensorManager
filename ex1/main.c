@@ -20,3 +20,9 @@ int main( void ) {
 	printf("\ndate struct values: %d-%d-%d \n", d.day, d.month, d.year);
 	return 0;
 }
+//segmentation fault = not allowed to point to anymore in memory
+//trying to acces locked of space of memory
+
+
+//int * ptr_x spaties maken niks uit allemaal hetzelfde
+
