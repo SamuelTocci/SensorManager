@@ -3,6 +3,7 @@
  */
 
 #include "ma_malloc.h"
+#include <stdio.h>
 
 #define MEM_POOL_SIZE 600   //in bytes
 typedef unsigned char byte;
@@ -40,30 +41,39 @@ void ma_init() {
  * If the request is possible, the pointer to the first possible address byte (right after its header) in memory pool is returned.
  */
 void *ma_malloc(size tsize) {
-   /*  if(tsize >= MEM_POOL_SIZE-sizeof(mem_chunk_header)){
+    if(tsize >= MEM_POOL_SIZE-sizeof(mem_chunk_header)){
         return 0;
     }
     
     int finished = 1;
     byte *current = mem_pool;
     while(finished && current+tsize <= (mem_pool + MEM_POOL_SIZE)){
+        //problem getting into if statements
         if(((mem_chunk_header*) current)->status == FREE && ((mem_chunk_header*) current)->size >= tsize){
             ((mem_chunk_header*) current)->status = ALLOCATED;
             ((mem_chunk_header*) current)->size = tsize;
 
             mem_chunk_header* ptr = (mem_chunk_header *) current;
             mem_chunk_header empty_header;
-            empty_header.size = (byte)(MEM_POOL_SIZE - sizeof(mem_chunk_header)); 
+            empty_header.size = (byte)(mem_pool - current - sizeof(empty_header)); 
             empty_header.status = FREE;
             *ptr = empty_header;            
 
-            byte *start = current + (byte)sizeof(mem_chunk_header);
+            byte *start = current + (byte)sizeof(empty_header);
+            printf("debug first if");
             return start;
         }
         if(((mem_chunk_header*) mem_pool)->status == ALLOCATED){
             current = current + (byte)sizeof(mem_chunk_header) + (byte)((mem_chunk_header*) current)->size;
+            printf("debug second if");
         }
-    } */
+        if (((mem_chunk_header*) mem_pool)->status == 0){
+            printf("probem with header");
+            return current; 
+        }
+        current += 1;
+        
+    }
 
     return 0;
 }
