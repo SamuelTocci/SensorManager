@@ -1,11 +1,11 @@
 # if you created a subfolder for every exercise this target will
 # build and execute the main.c file in the ex3 folder
-ex3: ex3/main.c
+ex1: ex1/main.c
 	mkdir -p build
-	gcc -Wall -Werror -o ./build/ex3 ex3/main.c
-	./build/ex3
+	gcc -g -Wall -Werror -o ./build/ex1 ex1/main.c ex1/ma_malloc.c
+	./build/ex1
 
 # the main file in the ex3 folder will be ziped and is then ready to
 # be submitted to labtools.groept.be
-zip: ex3/main.c
-	cd ex3 && zip ../lab3_ex3.zip main.c
+zip: ex1/main.c
+	cd ex1 && zip ../lab3_ex1.zip main.c
