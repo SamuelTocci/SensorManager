@@ -27,7 +27,11 @@ static byte mem_pool[MEM_POOL_SIZE];
  */
 void ma_init() {
 
-    //TODO: add your code here
+    mem_chunk_header* ptr = (mem_chunk_header *) mem_pool;
+    mem_chunk_header first;
+    first.size = (byte)(MEM_POOL_SIZE - sizeof(mem_chunk_header)); 
+    first.status = FREE;
+    *ptr = first;   
 
 }
 
@@ -36,9 +40,32 @@ void ma_init() {
  * If the request is possible, the pointer to the first possible address byte (right after its header) in memory pool is returned.
  */
 void *ma_malloc(size tsize) {
+   /*  if(tsize >= MEM_POOL_SIZE-sizeof(mem_chunk_header)){
+        return 0;
+    }
+    
+    int finished = 1;
+    byte *current = mem_pool;
+    while(finished && current+tsize <= (mem_pool + MEM_POOL_SIZE)){
+        if(((mem_chunk_header*) current)->status == FREE && ((mem_chunk_header*) current)->size >= tsize){
+            ((mem_chunk_header*) current)->status = ALLOCATED;
+            ((mem_chunk_header*) current)->size = tsize;
 
-    //TODO: add your code here
+            mem_chunk_header* ptr = (mem_chunk_header *) current;
+            mem_chunk_header empty_header;
+            empty_header.size = (byte)(MEM_POOL_SIZE - sizeof(mem_chunk_header)); 
+            empty_header.status = FREE;
+            *ptr = empty_header;            
 
+            byte *start = current + (byte)sizeof(mem_chunk_header);
+            return start;
+        }
+        if(((mem_chunk_header*) mem_pool)->status == ALLOCATED){
+            current = current + (byte)sizeof(mem_chunk_header) + (byte)((mem_chunk_header*) current)->size;
+        }
+    } */
+
+    return 0;
 }
 
 /**
