@@ -21,19 +21,17 @@ typedef struct {
 
 
 static byte mem_pool[MEM_POOL_SIZE];
-
+const int header_size = (int) sizeof(mem_chunk_header);
 /**
  * Allocates array of bytes (memory pool) and initializes the memory allocator.
  * If some bytes have been used after calling ma_malloc(size), calling to ma_init() will result in clearing up the memory pool.
  */
 void ma_init() {
-
-    mem_chunk_header* ptr = (mem_chunk_header *) mem_pool;
-    mem_chunk_header first;
-    first.size = (byte)(MEM_POOL_SIZE - sizeof(mem_chunk_header)); 
-    first.status = FREE;
-    *ptr = first;   
-
+    for (int i = 0; i < MEM_POOL_SIZE;  i++){
+        *(mem_pool +i) = 0x00;
+    } 
+    ((mem_chunk_header*) mem_pool)->size = MEM_POOL_SIZE - header_size;
+    ((mem_chunk_header*) mem_pool)->status = FREE;
 }
 
 /**
@@ -41,41 +39,35 @@ void ma_init() {
  * If the request is possible, the pointer to the first possible address byte (right after its header) in memory pool is returned.
  */
 void *ma_malloc(size tsize) {
-    if(tsize >= MEM_POOL_SIZE-sizeof(mem_chunk_header)){
-        return 0;
+    void* ptr = NULL;
+    
+    int i = 0;
+    mem_chunk_header* mem_chunk = (mem_chunk_header*) mem_pool;
+
+    while (i<MEM_POOL_SIZE && (mem_chunk->status == ALLOCATED || mem_chunk->size < tsize)){
+        mem_chunk = ((mem_chunk_header*)(mem_pool +i));
+        if (mem_chunk->status == ALLOCATED || mem_chunk->size < tsize){
+            int jump = (mem_chunk->size) + 2*header_size;
+            i += jump;
+        }   
+    }
+
+    if (i< MEM_POOL_SIZE){
+        int freeSpace = mem_chunk->size - (tsize + 2*header_size);
+        mem_chunk->size = tsize;
+        mem_chunk->status = ALLOCATED;
+        ptr = mem_chunk + 1;
+
+        mem_chunk_header* footer = (mem_chunk_header*)(ptr +tsize);
+        footer->size = tsize;
+        footer->status = ALLOCATED;
+
+        mem_chunk_header* new_header = (mem_chunk_header*)(ptr + tsize + header_size);
+        new_header->size = freeSpace;
+        new_header->status = FREE;
     }
     
-    int finished = 1;
-    byte *current = mem_pool;
-    while(finished && current+tsize <= (mem_pool + MEM_POOL_SIZE)){
-        //problem getting into if statements
-        if(((mem_chunk_header*) current)->status == FREE && ((mem_chunk_header*) current)->size >= tsize){
-            ((mem_chunk_header*) current)->status = ALLOCATED;
-            ((mem_chunk_header*) current)->size = tsize;
-
-            mem_chunk_header* ptr = (mem_chunk_header *) current;
-            mem_chunk_header empty_header;
-            empty_header.size = (byte)(mem_pool - current - sizeof(empty_header)); 
-            empty_header.status = FREE;
-            *ptr = empty_header;            
-
-            byte *start = current + (byte)sizeof(empty_header);
-            printf("debug first if");
-            return start;
-        }
-        if(((mem_chunk_header*) mem_pool)->status == ALLOCATED){
-            current = current + (byte)sizeof(mem_chunk_header) + (byte)((mem_chunk_header*) current)->size;
-            printf("debug second if");
-        }
-        if (((mem_chunk_header*) mem_pool)->status == 0){
-            printf("probem with header");
-            return current; 
-        }
-        current += 1;
-        
-    }
-
-    return 0;
+    return ptr;
 }
 
 /**
@@ -83,9 +75,13 @@ void *ma_malloc(size tsize) {
  * Implement also the coalescing behavior.
  */
 void ma_free(void *ptr) {
-
-    //TODO: add your code here
-
+    size tsize = ((mem_chunk_header*)ptr)->size;
+    
+    for (int i = 0; i < tsize;  i++){
+        *(ptr + i) = 0x00;
+    }
+      
+    ((mem_chunk_header*)ptr)->status = FREE;
 }
 
 /**
