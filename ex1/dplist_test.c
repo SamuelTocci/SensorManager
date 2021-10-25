@@ -27,9 +27,11 @@ START_TEST(test_ListFree)
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
         // TODO : Test free with one element
         list = dpl_create();
-        list = dpl_insert_at_index(NULL,'A', -1);
+        dplist_t *result = NULL;
+        result = dpl_insert_at_index(NULL,'A', -1);
         dpl_free(&list);
-        ck_assert_msg(list == NULL, "Failure; Test free with one element...");
+        dpl_free(&result);
+        ck_assert_msg(result == NULL, "Failure; Test free with one element...");
         // TODO : Test free with multiple element
 
     }
