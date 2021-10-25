@@ -25,6 +25,7 @@ START_TEST(test_ListFree)
         list = dpl_create();
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+
         // TODO : Test free with one element
         list = dpl_create();
         dplist_t *result = NULL;
@@ -32,8 +33,14 @@ START_TEST(test_ListFree)
         dpl_free(&list);
         dpl_free(&result);
         ck_assert_msg(result == NULL, "Failure; Test free with one element...");
-        // TODO : Test free with multiple element
 
+        // TODO : Test free with multiple element
+        result = dpl_insert_at_index(NULL,'A', 0);
+        result = dpl_insert_at_index(NULL,'B', 1);
+        result = dpl_insert_at_index(NULL,'C', 2);
+        result = dpl_insert_at_index(NULL,'D', 3);
+        dpl_free(&result);
+        ck_assert_msg(result == NULL, "Failure; Test free with multiple elements...");
     }
 END_TEST
 
@@ -42,9 +49,17 @@ START_TEST(test_ListInsertAtIndexListNULL)
         // Test inserting at index -1
         dplist_t *result = dpl_insert_at_index(NULL, 'A', -1);
         ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+        dpl_free(&result);
+
         // TODO : Test inserting at index 0
+        result = dpl_insert_at_index(NULL, 'A', 0);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+        dpl_free(&result);
 
         // TODO : Test inserting at index 99
+        result = dpl_insert_at_index(NULL, 'A', 99);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+        dpl_free(&result);
     }
 END_TEST
 
@@ -57,8 +72,17 @@ START_TEST(test_ListInsertAtIndexListEmpty)
                                          dpl_size(result));
     dpl_free(&list);
     // TODO : Test inserting at index 0
-
+    list = dpl_create();//bij free wordt head Null dus hier even terug aanmaken
+    dplist_t *result2 = dpl_insert_at_index(list, 'A', 0);
+    ck_assert_msg(dpl_size(result2) == 1, "Failure: expected list to have size of 1, got a size of %d",
+                                         dpl_size(result2));
+    dpl_free(&list);
     // TODO : Test inserting at index 99
+    list = dpl_create();//bij free wordt head Null dus hier even terug aanmaken
+    dplist_t *result3 = dpl_insert_at_index(list, 'A', 99);
+    ck_assert_msg(dpl_size(result3) == 1, "Failure: expected list to have size of 1, got a size of %d",
+                                         dpl_size(result3));
+    dpl_free(&list);
 }
 END_TEST
 

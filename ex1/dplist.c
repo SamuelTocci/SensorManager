@@ -78,11 +78,11 @@ void dpl_free(dplist_t **list) {
         last = last->prev;
         free(cur_free);
     }
+    free(last);
     free(*list);
+    last = NULL;
     *list = NULL;
     return;
-    
-    
 }
 
 /* Important note: to implement any list manipulation operator (insert, append, delete, sort, ...), always be aware of the following cases:
@@ -141,8 +141,6 @@ dplist_t *dpl_remove_at_index(dplist_t *list, int index) {
 
 int dpl_size(dplist_t *list) {
 
-    //TODO: add your code her
-    
     if(list == NULL) return -1;
     int counter = 0;
     dplist_node_t *el;
