@@ -86,11 +86,36 @@ START_TEST(test_ListInsertAtIndexListEmpty)
 }
 END_TEST
 
-// START_TEST(test_nameOfYourTest)
-// {
+START_TEST(test_ListInsertAtIndexListOne)
+{
+    //Test inserting at index -1
+    dplist_t *list = dpl_create();
+    dplist_t *result = dpl_insert_at_index(list, 'A', -1);
 
-// }
-// END_TEST
+    result = dpl_insert_at_index(list, 'B', -1);
+    ck_assert_msg(dpl_size(result)==2, "Failure: expected list to have size of 2, got a size of %d",
+                                         dpl_size(result));
+    dpl_free(&list);
+
+    //Test inserting at index 0
+    list = dpl_create();
+    dplist_t *result2 = dpl_insert_at_index(list, 'A', -1);
+
+    result2 = dpl_insert_at_index(list, 'B', 0);
+    ck_assert_msg(dpl_size(result2)==2, "Failure: expected list to have size of 2, got a size of %d",
+                                         dpl_size(result2));
+    dpl_free(&list);
+
+    //Test inserting at index 99
+    list = dpl_create();
+    dplist_t *result3 = dpl_insert_at_index(list, 'A', -1);
+
+    result3 = dpl_insert_at_index(list, 'B', 99);
+    ck_assert_msg(dpl_size(result3)==2, "Failure: expected list to have size of 2, got a size of %d",
+                                         dpl_size(result3));
+    dpl_free(&list);
+}
+END_TEST
 
 // START_TEST(test_nameOfYourTest)
 //  Add other testcases here...
@@ -107,6 +132,7 @@ int main(void) {
     tcase_add_test(tc1_1, test_ListFree);
     tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
     tcase_add_test(tc1_1, test_ListInsertAtIndexListEmpty);
+    tcase_add_test(tc1_1, test_ListInsertAtIndexListOne);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
