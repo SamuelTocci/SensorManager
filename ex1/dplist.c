@@ -68,11 +68,19 @@ void dpl_free(dplist_t **list) {
 
     dplist_node_t *last = dpl_get_reference_at_index(*list,size);
     dplist_node_t *cur_free;
+    if(last == NULL){
+        free(*list);
+        *list = NULL;
+        return;
+        }
     while (last->prev != NULL){
         cur_free = last;
         last = last->prev;
         free(cur_free);
     }
+    free(*list);
+    *list = NULL;
+    return;
     
     
 }
