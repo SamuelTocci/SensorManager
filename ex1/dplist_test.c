@@ -26,7 +26,10 @@ START_TEST(test_ListFree)
         dpl_free(&list);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
         // TODO : Test free with one element
-
+        list = dpl_create();
+        list = dpl_insert_at_index(NULL,'A', -1);
+        dpl_free(&list);
+        ck_assert_msg(list == NULL, "Failure; Test free with one element...");
         // TODO : Test free with multiple element
 
     }
@@ -57,9 +60,15 @@ START_TEST(test_ListInsertAtIndexListEmpty)
 }
 END_TEST
 
-//START_TEST(test_nameOfYourTest)
+// START_TEST(test_nameOfYourTest)
+// {
+
+// }
+// END_TEST
+
+// START_TEST(test_nameOfYourTest)
 //  Add other testcases here...
-//END_TEST
+// END_TEST
 
 int main(void) {
     Suite *s1 = suite_create("LIST_EX1");

@@ -59,8 +59,22 @@ dplist_t *dpl_create() {
 
 void dpl_free(dplist_t **list) {
 
-    //TODO: add your code here
+    if (*list == NULL) return;
+    // else{
+    //     free(*list);
+    //     *list = NULL;
+    // }
+    int size = dpl_size(*list);
 
+    dplist_node_t *last = dpl_get_reference_at_index(*list,size);
+    dplist_node_t *cur_free;
+    while (last->prev != NULL){
+        cur_free = last;
+        last = last->prev;
+        free(cur_free);
+    }
+    
+    
 }
 
 /* Important note: to implement any list manipulation operator (insert, append, delete, sort, ...), always be aware of the following cases:
@@ -119,8 +133,19 @@ dplist_t *dpl_remove_at_index(dplist_t *list, int index) {
 
 int dpl_size(dplist_t *list) {
 
-    //TODO: add your code here
-    return -1;
+    //TODO: add your code her
+    
+    if(list == NULL) return -1;
+    int counter = 0;
+    dplist_node_t *el;
+    el = list->head;//checking if it is null to vermijd nullpointer(segmentation fault in C)
+    while (el != NULL)
+    {
+        counter ++;
+        el = el->next;
+    }
+    return counter;
+    
 }
 
 dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
