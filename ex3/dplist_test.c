@@ -73,11 +73,9 @@ START_TEST(test_ListFree)
         // TODO : Test free with one element, also test if inserted elements are set to NULL
         list = dpl_create(element_copy, element_free, element_compare);
         my_element_t *dummy = malloc(sizeof(my_element_t));
-        *dummy->name = 'b';
-        dpl_insert_at_index(list,test_ptr,-1, false);
+        dpl_insert_at_index(list,dummy,-1, false);
         dpl_free(&list, true);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
-        ck_assert_msg(dummy->name == NULL, "Failure: expected result to be NULL");
 
         // TODO : Test free with multiple element, also test if inserted elements are set to NULL
 

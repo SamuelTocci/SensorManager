@@ -87,6 +87,7 @@ void dpl_free(dplist_t **list, bool free_element) {
             (*list)->element_free(cur_free->element);
             free(cur_free);
         }
+        (*list)->element_free(cur_free->element);
         free(last);
         free(*list);
         last = NULL;

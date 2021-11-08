@@ -15,11 +15,11 @@ test :
 	@echo -e '*************************'
 	./$(EXE)
 
-valgrind : test
-		CK_FORK=no valgrind --leak-check=full $(EXE)
+valgrind :
+	CK_FORK=no valgrind --leak-check=full $(EXE)
 
-gdb : test
-		CK_FORK=no gdb $(EXE)
+gdb :
+	CK_FORK=no gdb $(EXE)
 
 .PHONY : clean check
 
