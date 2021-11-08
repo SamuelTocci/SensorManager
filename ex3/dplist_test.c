@@ -48,6 +48,8 @@ void teardown(void) {
 }
 START_TEST(test_ListFree)
     {
+        int test = 5;
+        int * test_ptr = &test;
         // Test free NULL, don't use callback
         dplist_t *list = NULL;
         dpl_free(&list, false);
@@ -66,12 +68,40 @@ START_TEST(test_ListFree)
         // Test free empty list, use callback
         list = dpl_create(element_copy, element_free, element_compare);
         dpl_free(&list, true);
-        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+        ck_assert_msg(list == NULL,"Failure: expected result to be NULL" );
 
         // TODO : Test free with one element, also test if inserted elements are set to NULL
+        list = dpl_create(element_copy, element_free, element_compare);
+        my_element_t *dummy = malloc(sizeof(my_element_t));
+        *dummy->name = 'b';
+        dpl_insert_at_index(list,test_ptr,-1, false);
+        dpl_free(&list, true);
+        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+        ck_assert_msg(dummy->name == NULL, "Failure: expected result to be NULL");
 
         // TODO : Test free with multiple element, also test if inserted elements are set to NULL
 
+    }
+END_TEST
+
+START_TEST(test_ListInsertAtIndexListNULL)
+    {
+        int test = 5;
+        int * test_ptr = &test;
+        // Test inserting at index -1
+        dplist_t *result = dpl_insert_at_index(NULL, test_ptr, -1, false);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+        dpl_free(&result,true);
+
+        // TODO : Test inserting at index 0
+        result = dpl_insert_at_index(NULL, test_ptr, 0, false);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+        dpl_free(&result,true);
+
+        // TODO : Test inserting at index 99
+        result = dpl_insert_at_index(NULL, test_ptr, 99, false);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+        dpl_free(&result,true);
     }
 END_TEST
 
@@ -88,6 +118,7 @@ int main(void) {
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
     tcase_add_test(tc1_1, test_ListFree);
+    tcase_add_test(tc1_1,test_ListInsertAtIndexListNULL);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
