@@ -117,6 +117,39 @@ START_TEST(test_ListInsertAtIndexListOne)
 }
 END_TEST
 
+START_TEST(test_ListInsertAtIndexListMulti)
+{
+    //Test inserting at index -1
+    dplist_t *list = dpl_create();
+    dplist_t *result = dpl_insert_at_index(list, 'A', -1);
+    result = dpl_insert_at_index(list, 'F', -1);
+
+    result = dpl_insert_at_index(list, 'B', -1);
+    ck_assert_msg(dpl_size(result)==3, "Failure: expected list to have size of 3, got a size of %d",
+                                         dpl_size(result));
+    dpl_free(&list);
+
+    //Test inserting at index 0
+    list = dpl_create();
+    dplist_t *result2 = dpl_insert_at_index(list, 'A', -1);
+    result = dpl_insert_at_index(list, 'F', -1);
+
+    result2 = dpl_insert_at_index(list, 'B', 0);
+    ck_assert_msg(dpl_size(result2)==3, "Failure: expected list to have size of 3, got a size of %d",
+                                         dpl_size(result2));
+    dpl_free(&list);
+
+    //Test inserting at index 99
+    list = dpl_create();
+    dplist_t *result3 = dpl_insert_at_index(list, 'A', -1);
+    result = dpl_insert_at_index(list, 'F', -1);
+
+    result3 = dpl_insert_at_index(list, 'B', 99);
+    ck_assert_msg(dpl_size(result3)==3, "Failure: expected list to have size of 3, got a size of %d",
+                                         dpl_size(result3));
+    dpl_free(&list);
+}
+END_TEST
 // START_TEST(test_nameOfYourTest)
 //  Add other testcases here...
 // END_TEST
@@ -133,6 +166,7 @@ int main(void) {
     tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
     tcase_add_test(tc1_1, test_ListInsertAtIndexListEmpty);
     tcase_add_test(tc1_1, test_ListInsertAtIndexListOne);
+    tcase_add_test(tc1_1, test_ListInsertAtIndexListMulti);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
