@@ -78,7 +78,7 @@ void dpl_free(dplist_t **list, bool free_element) {
         dplist_node_t *cur_free;
         if(last == NULL){
             free(*list);
-            *list = NULL;
+            list = NULL;
             return;
             }
         while (last->prev != NULL){
