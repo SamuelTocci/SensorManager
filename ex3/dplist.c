@@ -71,48 +71,22 @@ dplist_t *dpl_create(// callback functions
 void dpl_free(dplist_t **list, bool free_element) {
 
     if(*list == NULL) return;
-
-    int size = dpl_size(*list);
-    if(free_element == true){
-        dplist_node_t *last = dpl_get_reference_at_index(*list,size);
-        dplist_node_t *cur_free;
-        if(last == NULL){
-            free(*list);
-            list = NULL;
-            return;
-            }
-        while (last->prev != NULL){
-            cur_free = last;
-            last = last->prev;
-            (*list)->element_free(cur_free->element);
-            free(cur_free);
+    dplist_node_t * list_node;
+    dplist_t * dummy = *list;
+    list_node = dummy->head;
+    int size = dpl_size(dummy);
+    for (int i = 0; i < size; i++)
+    {
+        if(free_element){
+            dummy ->element_free(&list_node->element);
         }
-        (*list)->element_free(cur_free->element);
-        free(last);
-        free(*list);
-        last = NULL;
-        *list = NULL;
-        return;
-    }
-    if(free_element == false){
-        dplist_node_t *last = dpl_get_reference_at_index(*list,size);
-        dplist_node_t *cur_free;
-        if(last == NULL){
-            free(*list);
-            *list = NULL;
-            return;
-            }
-        while (last->prev != NULL){
-            cur_free = last;
-            last = last->prev;
-            free(cur_free);
+        list_node = list_node->next;
+        if(size > 1){
+            free(list_node->prev);
         }
-        free(last);
-        free(*list);
-        last = NULL;
-        *list = NULL;
-        return;
     }
+    free(dummy);
+    *list = NULL;
 }
 
 dplist_t *dpl_insert_at_index(dplist_t *list, void *element, int index, bool insert_copy) {
