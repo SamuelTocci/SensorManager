@@ -149,8 +149,50 @@ dplist_t *dpl_insert_at_index(dplist_t *list, void *element, int index, bool ins
 dplist_t *dpl_remove_at_index(dplist_t *list, int index, bool free_element) {
 
     //TODO: add your code here
+    if (list == NULL || index > dpl_size(list) || dpl_size(list) == 0)return list;
     
+    // dplist_node_t * list_node = list->head->next; //starting on index 0 of list
+    // for (int i = 1; i < index && i <= dpl_size(list); i++){ //move to correct index
+    //     list_node = list_node->next;
+    // }
 
+    // if(list_node->prev != NULL && list_node->next != NULL){ //check if index on edge of list
+    //     list_node->prev->next = list_node->next;
+    //     list_node->next->prev = list_node->prev;
+    // }
+    // if(list_node->prev == NULL){
+    //     if(list_node->next != NULL){
+    //         list_node->next->prev = list->head;
+    //     }
+    //     else{
+    //         list->head->next = NULL;
+    //     }
+    // }
+    // if (free_element){
+    //     list->element_free(&list_node->element);
+    // }
+    dplist_node_t * list_node = dpl_get_reference_at_index(list, index);
+
+    if(index <=0){
+        if(list_node->next != NULL){ //if list is not empty
+            list_node = list_node->next; //goto first node
+            if(list_node->next != NULL){ //if list is bigger than 1 node
+                list_node->prev->next = list_node->next; //connect head -> 2nd node
+                list_node->next->prev = list_node->prev; //connect head <- 2nd node
+            }
+            else{ //if list is only 1 node
+                list_node->prev->next = NULL;
+            }
+            if(free_element) list->element_free(&list_node->element);
+        }
+        else return list;
+    }
+    else{
+        
+    }
+
+    free(list_node);
+    return list;
 }
 
 int dpl_size(dplist_t *list) {

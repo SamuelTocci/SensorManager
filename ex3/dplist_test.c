@@ -111,6 +111,76 @@ START_TEST(test_ListInsertAtIndexListNULL)
     }
 END_TEST
 
+START_TEST(test_ListRemoveAtIndexListNull)
+    {
+        dplist_t * list = NULL;
+        dplist_t * result;
+        result = dpl_remove_at_index(list, -1, false);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+
+        result = dpl_remove_at_index(list, -1, false);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+
+        result = dpl_remove_at_index(list, 0, false);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+
+        result = dpl_remove_at_index(list, 99, false);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+
+        result = dpl_remove_at_index(list, 1, true);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+    }
+END_TEST
+
+START_TEST(test_ListRemoveAtIndexListEmpty)
+    {
+        dplist_t * list = dpl_create(element_copy, element_free, element_compare);
+        dplist_t * result;
+        result = dpl_remove_at_index(list, -1, false);
+        ck_assert_msg(result == list, "Failure: expected list to remain the same");
+
+        result = dpl_remove_at_index(list, 0, false);
+        ck_assert_msg(result == list, "Failure: expected list to remain the same");
+
+        result = dpl_remove_at_index(list, 99, false);
+        ck_assert_msg(result == list, "Failure: expected list to remain the same");
+
+        result = dpl_remove_at_index(list, 1, true);
+        ck_assert_msg(result == list, "Failure: expected list to remain the same");
+    }
+END_TEST
+
+START_TEST(test_ListRemoveAtIndexListOne)
+    {
+        dplist_t * listCompare = dpl_create(element_copy, element_free, element_compare);
+        dplist_t * result;
+
+        dplist_t * list = dpl_create(element_copy, element_free, element_compare);
+        my_element_t *dummy = malloc(sizeof(my_element_t));
+        dpl_insert_at_index(list,dummy,-1, false);
+        result = dpl_remove_at_index(list, -1, false);
+        ck_assert_msg(result == listCompare, "Failure: expected list to be empty");
+
+        // list = dpl_create(element_copy, element_free, element_compare);
+        // dummy = malloc(sizeof(my_element_t));
+        // dpl_insert_at_index(list,dummy,-1, false);
+        // result = dpl_remove_at_index(list, 0, false);
+        // ck_assert_msg(result == listCompare, "Failure: expected list to be empty");
+
+        // list = dpl_create(element_copy, element_free, element_compare);
+        // dummy = malloc(sizeof(my_element_t));
+        // dpl_insert_at_index(list,dummy,-1, false);
+        // result = dpl_remove_at_index(list, 99, false);
+        // ck_assert_msg(result == listCompare, "Failure: expected list to be empty");
+
+        // list = dpl_create(element_copy, element_free, element_compare);
+        // dummy = malloc(sizeof(my_element_t));
+        // dpl_insert_at_index(list,dummy,-1, false);
+        // result = dpl_remove_at_index(list, 1, true);
+        // ck_assert_msg(result == listCompare, "Failure: expected list to be empty");
+    }
+END_TEST
+
 //START_TEST(test_nameOfYourTest)
 //  Add other testcases here...
 //END_TEST
@@ -124,7 +194,10 @@ int main(void) {
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
     tcase_add_test(tc1_1, test_ListFree);
-    tcase_add_test(tc1_1,test_ListInsertAtIndexListNULL);
+    tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
+    tcase_add_test(tc1_1, test_ListRemoveAtIndexListNull);
+    tcase_add_test(tc1_1, test_ListRemoveAtIndexListEmpty);
+    tcase_add_test(tc1_1, test_ListRemoveAtIndexListOne);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
