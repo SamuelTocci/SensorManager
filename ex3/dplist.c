@@ -94,7 +94,9 @@ void dpl_free(dplist_t **list, bool free_element) {
     while (dummy->head != NULL){
         list_node = dummy->head;
         dummy->head = list_node->next;
-        dummy ->element_free(&list_node->element);
+        if(free_element){
+            dummy ->element_free(&list_node->element);
+        }
         free(list_node);
     }
     free(dummy);
@@ -147,6 +149,7 @@ dplist_t *dpl_insert_at_index(dplist_t *list, void *element, int index, bool ins
 dplist_t *dpl_remove_at_index(dplist_t *list, int index, bool free_element) {
 
     //TODO: add your code here
+    
 
 }
 
