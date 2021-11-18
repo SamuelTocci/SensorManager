@@ -1,3 +1,7 @@
+/**
+ * \author Samuel Tocci
+ */
+
 #define _GNU_SOURCE
 
 #include <stdio.h>
@@ -23,15 +27,12 @@ void * element_copy(void * element) {
     // copy->id = ((sensor_data_t*)element)->id;
     // copy->id = new_id;
     // return (void *) copy;
-    void * a;
+    void * a = NULL;
     return a;
     //TODO: code aanpassen naar sensor_data_t struct
 }
 
 void element_free(void ** element) {
-    free((((sensor_data_t*)*element))->id);
-    free((((sensor_data_t*)*element))->value);
-    free((((sensor_data_t*)*element))->ts);
     free(*element);
     *element = NULL;
 }
@@ -49,6 +50,7 @@ START_TEST(test_readFile)
     FILE * data_file = fopen("sensor_data", "r");
     FILE * map_file = fopen("room_sensor.map", "r");
     
+    printf("readfile print\n");
     datamgr_parse_sensor_files(map_file, data_file);
 
     fclose(data_file);
@@ -76,7 +78,7 @@ int main(void){
 
     nf = srunner_ntests_failed(sr);
     srunner_free(sr);
-
+    printf("main print\n");
     return nf == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 
 }
