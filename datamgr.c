@@ -43,6 +43,7 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data){
         dummy_data->id = sensor_data.id;
 
         int index = dpl_get_index_of_element(sensor_list, dummy_data); //search element with same id in sensor_list
+        free(dummy_data);
         sensor_t * element = malloc(sizeof(sensor_t));
         element = dpl_get_element_at_index(sensor_list, index);
 
