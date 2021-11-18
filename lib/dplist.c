@@ -168,13 +168,25 @@ int dpl_size(dplist_t *list) {
 
 void *dpl_get_element_at_index(dplist_t *list, int index) {
 
-    //TODO: add your code here
-
+    dplist_node_t *curr_node = list->head;
+    if(curr_node->next != NULL) curr_node = curr_node->next; //goto index 0 if there is at least 1 element
+    for (int i = 0; i < index; i++){
+        curr_node = curr_node->next;
+    }
+    return curr_node->element;
 }
 
 int dpl_get_index_of_element(dplist_t *list, void *element) {
-
-    //TODO: add your code here
+    dplist_node_t *curr_node = list->head;
+    if(list == NULL)return -1;
+    for (int index = 0; index < dpl_size(list)-1 ; index++){
+        curr_node = curr_node->next;
+        void *curr_element = curr_node->element;
+        if(list->element_compare(curr_element, element) == 0){ //==0 betekend dat ze gelijk zijn
+            return index;
+        }
+    }
+    return -1;
 
 }
 

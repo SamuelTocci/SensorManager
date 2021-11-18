@@ -3,6 +3,7 @@
         "stdio.h": "c",
         "assert.h": "c",
         "dplist.h": "c",
-        "datamgr.h": "c"
+        "datamgr.h": "c",
+        "stdint.h": "c"
     }
 }

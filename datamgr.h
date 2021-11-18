@@ -33,6 +33,13 @@
                     } while(0)
 
 
+typedef struct{
+    sensor_id_t sensor_id;         /** < sensor id */
+    room_id_t room_id;
+    sensor_value_t run_value[RUN_AVG_LENGTH];   /** < sensor value */
+    sensor_ts_t ts;         /** < sensor timestamp */
+}sensor_t;
+
 /**
  *  This method holds the core functionality of your datamgr. It takes in 2 file pointers to the sensor files and parses them. 
  *  When the method finishes all data should be in the internal pointer list and all log messages should be printed to stderr.

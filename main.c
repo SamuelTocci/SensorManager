@@ -14,10 +14,7 @@
 #include "config.h"
 #include "lib/dplist.h"
 #include <check.h>
-
-void* element_copy(void * element);
-void element_free(void ** element);
-int element_compare(void * x, void * y);
+#include "datamgr.h"
 
 void * element_copy(void * element) {
     // sensor_data_t* copy = malloc(sizeof (sensor_data_t));
@@ -38,7 +35,7 @@ void element_free(void ** element) {
 }
 
 int element_compare(void * x, void * y) {
-    return ((((sensor_data_t*)x)->id < ((sensor_data_t*)y)->id) ? -1 : (((sensor_data_t*)x)->id == ((sensor_data_t*)y)->id) ? 0 : 1);
+    return ((((sensor_t*)x)->sensor_id < ((sensor_t*)y)->sensor_id) ? -1 : (((sensor_t*)x)->sensor_id == ((sensor_t*)y)->sensor_id) ? 0 : 1);
 }
 
 void setup(void) {}
@@ -52,6 +49,8 @@ START_TEST(test_readFile)
     
     printf("readfile print\n");
     datamgr_parse_sensor_files(map_file, data_file);
+
+    datamgr_free();
 
     fclose(data_file);
     fclose(map_file);
