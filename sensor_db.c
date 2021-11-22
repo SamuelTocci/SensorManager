@@ -2,6 +2,8 @@
  * \author Samuel Tocci
  */
 
+#define _GNU_SOURCE
+
 #ifndef _SENSOR_DB_H_
 #define _SENSOR_DB_H_
 
@@ -9,11 +11,7 @@
 #include <stdlib.h>
 #include "config.h"
 #include <sqlite3.h>
-
-// stringify preprocessor directives using 2-level preprocessor magic
-// this avoids using directives like -DDB_NAME=\"some_db_name\"
-#define REAL_TO_STRING(s) #s
-#define TO_STRING(s) REAL_TO_STRING(s)    //force macro-expansion on s before stringify s
+#include "sensor_db.h"
 
 typedef int (*callback_t)(void *, int, char **, char **);
 
@@ -23,7 +21,26 @@ typedef int (*callback_t)(void *, int, char **, char **);
  * \param clear_up_flag if the table existed, clear up the existing data when clear_up_flag is set to 1
  * \return the connection for success, NULL if an error occurs
  */
-DBCONN *init_connection(char clear_up_flag);
+DBCONN *init_connection(char clear_up_flag){
+	sqlite3 *conn;
+	char *err_msg = 0;
+	char *query;
+
+	int rc = sqlite3_open(TO_STRING(DB_NAME), &conn);
+	if (rc != SQLITE_OK){
+		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+		sqlite3_close(conn);
+		return NULL;
+	}
+	if(clear_up_flag == 1){
+		asprintf(&query, "DROP TABLE IF EXISTS %1$s;"
+						"CREATE TABLE %1$s(Id Integer, sensor_id Integer, sensor_value DECIMAL(4,2), timestamp TIMESTAMP, PRIMARY KEY (Id));", TO_STRING(TABLE_NAME));
+		int result = sqlite3_exec(conn, query, 0,0, &err_msg);
+		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+		free(query);
+	}
+	return conn;
+}
 
 /**
  * Disconnect from the database server

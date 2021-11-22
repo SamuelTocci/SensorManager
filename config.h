@@ -5,6 +5,19 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+#ifndef DB_NAME
+#define DB_NAME Sensor.db
+#endif
+
+#ifndef TABLE_NAME
+#define TABLE_NAME SensorData
+#endif
+
+#define DBCONN sqlite3
+
+#define REAL_TO_STRING(s) #s
+#define TO_STRING(s) REAL_TO_STRING(s)
+
 #include <stdint.h>
 #include <time.h>
 
