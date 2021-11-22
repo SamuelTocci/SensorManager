@@ -30,3 +30,5 @@ check : $(SOURCE) $(HEADERS)
 clean:
 	rm -f *.o $(EXE) *~
 
+zip:
+	zip lab4_ex3.zip dplist.c

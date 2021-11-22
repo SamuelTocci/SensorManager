@@ -206,7 +206,8 @@ dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
 void *dpl_get_element_at_reference(dplist_t *list, dplist_node_t *reference) {
 
     //TODO: add your code here
-
+    void * a = NULL;
+    return a;
 }
 
 
