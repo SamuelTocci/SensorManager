@@ -3,7 +3,7 @@ EXE=./datamgr_shared
 
 static:
 	gcc -c lib/dplist.c -o libdplist.a
-	gcc -static datamgr.c main.c -DSET_MAX_TEMP=20 -DSET_MIN_TEMP=10 libdplist.a -o datamgr
+	gcc -static datamgr.c main.c -DSET_MAX_TEMP=100 -DSET_MIN_TEMP=99 libdplist.a -o datamgr
 	./datamgr
 
 shared:

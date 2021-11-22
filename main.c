@@ -16,27 +16,6 @@
 #include <check.h>
 #include "datamgr.h"
 
-void * element_copy(void * element) {
-    // sensor_data_t* copy = malloc(sizeof (sensor_data_t));
-    // sensor_id_t new_id;
-    // asprintf(&new_id,"%s",((sensor_data_t*)element)->id);
-    // assert(copy != NULL);
-    // copy->id = ((sensor_data_t*)element)->id;
-    // copy->id = new_id;
-    // return (void *) copy;
-    void * a = NULL;
-    return a;
-    //TODO: code aanpassen naar sensor_data_t struct
-}
-
-void element_free(void ** element) {
-    free(*element);
-    *element = NULL;
-}
-
-int element_compare(void * x, void * y) {
-    return ((((sensor_t*)x)->sensor_id < ((sensor_t*)y)->sensor_id) ? -1 : (((sensor_t*)x)->sensor_id == ((sensor_t*)y)->sensor_id) ? 0 : 1);
-}
 
 void setup(void) {}
 

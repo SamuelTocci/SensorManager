@@ -69,26 +69,8 @@ dplist_t *dpl_create(// callback functions
 }
 
 void dpl_free(dplist_t **list, bool free_element) {
-
     if(*list == NULL) return;
-    // dplist_node_t * list_node;
-    // dplist_t * dummy = *list;
-    // list_node = dummy->head;
-    // int size = dpl_size(dummy);
-    // for (int i = 0; i < size; i++)
-    // {
-    //     if(free_element){
-    //         dummy ->element_free(&list_node->element);
-    //     }
-    //     if(list_node->next != NULL){
-    //         list_node = list_node->next;
-    //     }
-    //     if(list_node->prev != NULL){
-    //         //free(list_node->prev);
-    //     }
-    // }
-    // free(dummy);
-    // *list = NULL;
+
     dplist_node_t * list_node;
     dplist_t * dummy = *list;
     while (dummy->head != NULL){

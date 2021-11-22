@@ -94,4 +94,11 @@ time_t datamgr_get_last_modified(sensor_id_t sensor_id);
  */
 int datamgr_get_total_sensors();
 
+/**
+ *  Return the total amount of unique sensor ID's recorded by the datamgr
+ * \param sensor_id the sensor id to look for
+ * \return pointer to the sensor with sensor_id
+ */
+void *datamgr_get_sensor_with_id(sensor_id_t sensor_id);
+
 #endif  //DATAMGR_H_
