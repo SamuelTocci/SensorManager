@@ -71,24 +71,6 @@ dplist_t *dpl_create(// callback functions
 void dpl_free(dplist_t **list, bool free_element) {
 
     if(*list == NULL) return;
-    // dplist_node_t * list_node;
-    // dplist_t * dummy = *list;
-    // list_node = dummy->head;
-    // int size = dpl_size(dummy);
-    // for (int i = 0; i < size; i++)
-    // {
-    //     if(free_element){
-    //         dummy ->element_free(&list_node->element);
-    //     }
-    //     if(list_node->next != NULL){
-    //         list_node = list_node->next;
-    //     }
-    //     if(list_node->prev != NULL){
-    //         //free(list_node->prev);
-    //     }
-    // }
-    // free(dummy);
-    // *list = NULL;
     dplist_node_t * list_node;
     dplist_t * dummy = *list;
     while (dummy->head != NULL){
@@ -148,29 +130,7 @@ dplist_t *dpl_insert_at_index(dplist_t *list, void *element, int index, bool ins
 
 dplist_t *dpl_remove_at_index(dplist_t *list, int index, bool free_element) {
 
-    //TODO: add your code here
     if (list == NULL || index > dpl_size(list) || dpl_size(list) == 0)return list;
-    
-    // dplist_node_t * list_node = list->head->next; //starting on index 0 of list
-    // for (int i = 1; i < index && i <= dpl_size(list); i++){ //move to correct index
-    //     list_node = list_node->next;
-    // }
-
-    // if(list_node->prev != NULL && list_node->next != NULL){ //check if index on edge of list
-    //     list_node->prev->next = list_node->next;
-    //     list_node->next->prev = list_node->prev;
-    // }
-    // if(list_node->prev == NULL){
-    //     if(list_node->next != NULL){
-    //         list_node->next->prev = list->head;
-    //     }
-    //     else{
-    //         list->head->next = NULL;
-    //     }
-    // }
-    // if (free_element){
-    //     list->element_free(&list_node->element);
-    // }
     dplist_node_t * list_node = dpl_get_reference_at_index(list, index);
 
     if(index <=0){
@@ -209,15 +169,25 @@ int dpl_size(dplist_t *list) {
 }
 
 void *dpl_get_element_at_index(dplist_t *list, int index) {
-
-    //TODO: add your code here
-
+    dplist_node_t *curr_node = list->head;
+    if(curr_node->next != NULL) curr_node = curr_node->next; //goto index 0 if there is at least 1 element
+    for (int i = 0; i < index; i++){
+        curr_node = curr_node->next;
+    }
+    return curr_node->element;
 }
 
 int dpl_get_index_of_element(dplist_t *list, void *element) {
-
-    //TODO: add your code here
-
+    dplist_node_t *curr_node = list->head;
+    if(list == NULL)return -1;
+    for (int index = 0; index < dpl_size(list)-1 ; index++){
+        curr_node = curr_node->next;
+        void *curr_element = curr_node->element;
+        if(list->element_compare(curr_element, element) == 0){ //==0 betekend dat ze gelijk zijn
+            return index;
+        }
+    }
+    return -1;
 }
 
 dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
@@ -238,5 +208,8 @@ void *dpl_get_element_at_reference(dplist_t *list, dplist_node_t *reference) {
     //TODO: add your code here
 
 }
+
+
+
 
 
