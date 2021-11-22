@@ -19,6 +19,16 @@ START_TEST(test_init_connect)
 }
 END_TEST
 
+START_TEST(test_insert_sensor)
+{
+    DBCONN *result = init_connection(1);
+    
+    int check = insert_sensor(result, 5, 25, 27498);
+    ck_assert_msg(check == 1, "Error: expected result to to be 1");
+
+}
+END_TEST
+
 
 int main(void){
     Suite *s1 = suite_create("LIST_EX3");
@@ -29,6 +39,7 @@ int main(void){
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
     tcase_add_test(tc1_1, test_init_connect);
+    tcase_add_test(tc1_1, test_insert_sensor);
 
     // Add other tests here...
 

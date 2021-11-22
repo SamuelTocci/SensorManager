@@ -34,7 +34,7 @@ DBCONN *init_connection(char clear_up_flag){
 	}
 	if(clear_up_flag == 1){
 		asprintf(&query, "DROP TABLE IF EXISTS %1$s;"
-						"CREATE TABLE %1$s(Id Integer, sensor_id Integer, sensor_value DECIMAL(4,2), timestamp TIMESTAMP, PRIMARY KEY (Id));", TO_STRING(TABLE_NAME));
+						"CREATE TABLE %1$s(Id Integer PRIMARY KEY AUTOINCREMENT, sensor_id Integer, sensor_value DECIMAL(4,2), timestamp TIMESTAMP);", TO_STRING(TABLE_NAME));
 		int result = sqlite3_exec(conn, query, 0,0, &err_msg);
 		free(query);
 	}
@@ -57,7 +57,21 @@ void disconnect(DBCONN *conn){
  * \param ts the measurement timestamp
  * \return zero for success, and non-zero if an error occurs
  */
-int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_t ts);
+int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_t ts){
+	char *query;
+	char *err_msg = 0;
+
+	asprintf(&query, "INSERT INTO %1$s VALUES(0,%2$u, %3$f, %4$ld);" //0 for id row -> auto assign id with increment
+						,TO_STRING(TABLE_NAME), id, value, ts);
+	int result = sqlite3_exec(conn, query, 0,0, &err_msg);
+	if (result == SQLITE_OK){
+		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+		sqlite3_close(conn);
+		return 1;
+	}
+	return 0;
+
+}
 
 /**
  * Write an INSERT query to insert all sensor measurements available in the file 'sensor_data'
