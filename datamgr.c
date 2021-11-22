@@ -101,8 +101,7 @@ void *datamgr_get_sensor_with_id(sensor_id_t sensor_id){
     int index = dpl_get_index_of_element(sensor_list, dummy_data);
     free(dummy_data);
 
-    sensor_t * element = malloc(sizeof(sensor_t));
-    element = dpl_get_element_at_index(sensor_list, index);
+    sensor_t * element = dpl_get_element_at_index(sensor_list, index);
     return element;
 }
 
