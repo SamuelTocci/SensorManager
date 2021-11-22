@@ -36,7 +36,6 @@ DBCONN *init_connection(char clear_up_flag){
 		asprintf(&query, "DROP TABLE IF EXISTS %1$s;"
 						"CREATE TABLE %1$s(Id Integer, sensor_id Integer, sensor_value DECIMAL(4,2), timestamp TIMESTAMP, PRIMARY KEY (Id));", TO_STRING(TABLE_NAME));
 		int result = sqlite3_exec(conn, query, 0,0, &err_msg);
-		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
 		free(query);
 	}
 	return conn;
@@ -46,7 +45,9 @@ DBCONN *init_connection(char clear_up_flag){
  * Disconnect from the database server
  * \param conn pointer to the current connection
  */
-void disconnect(DBCONN *conn);
+void disconnect(DBCONN *conn){
+	sqlite3_close(conn);
+}
 
 /**
  * Write an INSERT query to insert a single sensor measurement

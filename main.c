@@ -20,8 +20,6 @@ START_TEST(test_init_connect)
 END_TEST
 
 
-
-
 int main(void){
     Suite *s1 = suite_create("LIST_EX3");
     TCase *tc1_1 = tcase_create("Core");
@@ -31,6 +29,7 @@ int main(void){
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
     tcase_add_test(tc1_1, test_init_connect);
+
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
