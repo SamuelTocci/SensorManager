@@ -12,13 +12,6 @@
 
 dplist_t * sensor_list;
 
-
-/**
- *  This method holds the core functionality of your datamgr. It takes in 2 file pointers to the sensor files and parses them. 
- *  When the method finishes all data should be in the internal pointer list and all log messages should be printed to stderr.
- *  \param fp_sensor_map file pointer to the map file
- *  \param fp_sensor_data file pointer to the binary data file
- */
 void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data){
     room_id_t curr_room;
     sensor_id_t curr_sensor;
@@ -50,7 +43,11 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data){
         for (int i = 0; i < RUN_AVG_LENGTH; i++){ //find empty spot in run_value[]
             if(element->run_value[RUN_AVG_LENGTH-1] != 0){
                 sensor_value_t avg = datamgr_get_avg(element->sensor_id);
-                if (avg < 99 ){
+                if (avg < 99 ){ //TODO: SET_MIN_TEMP not working
+                    //do something
+                    printf ("id = %d value = %f room = %d %ld\n", element->sensor_id, avg, element->room_id, sensor_data.ts);
+                }
+                if (avg > 99 ){ //TODO: SET_MAX_TEMP not working
                     //do something
                     printf ("id = %d value = %f room = %d %ld\n", element->sensor_id, avg, element->room_id, sensor_data.ts);
                 }
@@ -64,36 +61,18 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data){
                 break;
             }
         }
-        //printf ("id = %d value = %f %ld\n", element->sensor_id, element->run_value[0], element->ts);
-
     }    
 }
 
-/**
- * This method should be called to clean up the datamgr, and to free all used memory. 
- * After this, any call to datamgr_get_room_id, datamgr_get_avg, datamgr_get_last_modified or datamgr_get_total_sensors will not return a valid result
- */
 void datamgr_free(){
     dpl_free(&sensor_list,true);
 }
 
-/**
- * Gets the room ID for a certain sensor ID
- * Use ERROR_HANDLER() if sensor_id is invalid
- * \param sensor_id the sensor id to look for
- * \return the corresponding room id
- */
 uint16_t datamgr_get_room_id(sensor_id_t sensor_id){
     sensor_t * element = datamgr_get_sensor_with_id(sensor_id);
     return element->room_id;
 }
 
-/**
- * Gets the running AVG of a certain senor ID (if less then RUN_AVG_LENGTH measurements are recorded the avg is 0)
- * Use ERROR_HANDLER() if sensor_id is invalid
- * \param sensor_id the sensor id to look for
- * \return the running AVG of the given sensor
- */
 sensor_value_t datamgr_get_avg(sensor_id_t sensor_id){
     sensor_t * element = datamgr_get_sensor_with_id(sensor_id);
     if(element == NULL)return -1;
@@ -107,21 +86,11 @@ sensor_value_t datamgr_get_avg(sensor_id_t sensor_id){
     return avg;
 }
 
-/**
- * Returns the time of the last reading for a certain sensor ID
- * Use ERROR_HANDLER() if sensor_id is invalid
- * \param sensor_id the sensor id to look for
- * \return the last modified timestamp for the given sensor
- */
 time_t datamgr_get_last_modified(sensor_id_t sensor_id){
     sensor_t * element = datamgr_get_sensor_with_id(sensor_id);
     return element->ts;
 }
 
-/**
- *  Return the total amount of unique sensor ID's recorded by the datamgr
- *  \return the total amount of sensors
- */
 int datamgr_get_total_sensors(){
     return dpl_size(sensor_list);
 }
