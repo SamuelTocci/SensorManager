@@ -30,6 +30,7 @@ DBCONN *init_connection(char clear_up_flag){
 	if (rc != SQLITE_OK){
 		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
 		sqlite3_close(conn);
+		free(query);
 		return NULL;
 	}
 	if(clear_up_flag == 1){
@@ -64,6 +65,7 @@ int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_
 	asprintf(&query, "INSERT INTO %1$s VALUES(0,%2$u, %3$f, %4$ld);" //0 for id row -> auto assign id with increment
 						,TO_STRING(TABLE_NAME), id, value, ts);
 	int result = sqlite3_exec(conn, query, 0,0, &err_msg);
+	free(query);
 	if (result == SQLITE_OK){
 		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
 		sqlite3_close(conn);
