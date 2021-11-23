@@ -14,7 +14,7 @@ void teardown(void) {}
 
 START_TEST(test_init_connect)
 {
-    DBCONN *result = init_connection(1);
+    DBCONN *result = init_connection(0);
     ck_assert_msg(result != NULL, "Error: expected result to not be NULL");
     disconnect(result); //to avoid mem leak
 }
@@ -22,9 +22,9 @@ END_TEST
 
 START_TEST(test_insert_sensor)
 {
-    DBCONN *result = init_connection(1);
+    DBCONN *result = init_connection(0);
     
-    int check = insert_sensor(result, 5, 25, 27498);
+    int check = insert_sensor(result, 5, 188, 27758);
     ck_assert_msg(check == 1, "Error: expected result to to be 1");
 
 }

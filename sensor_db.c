@@ -62,7 +62,7 @@ int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_
 	char *query;
 	char *err_msg = 0;
 
-	asprintf(&query, "INSERT INTO %1$s VALUES(0,%2$u, %3$f, %4$ld);" //0 for id row -> auto assign id with increment
+	asprintf(&query, "INSERT INTO %1$s (sensor_id, sensor_value, timestamp) VALUES(%2$u, %3$f, %4$ld);" //0 for id row -> auto assign id with increment
 						,TO_STRING(TABLE_NAME), id, value, ts);
 	int result = sqlite3_exec(conn, query, 0,0, &err_msg);
 	free(query);
@@ -72,6 +72,8 @@ int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_
 		return 1;
 	}
 	return 0;
+		// INSERT INTO COMPANY (NAME,AGE,ADDRESS,SALARY)
+		// VALUES ( 'Paul', 32, 'California', 20000.00 );
 
 }
 
