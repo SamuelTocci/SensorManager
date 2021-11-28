@@ -132,7 +132,19 @@ int find_sensor_by_value(DBCONN *conn, sensor_value_t value, callback_t f){
  * \param f function pointer to the callback method that will handle the result set
  * \return zero for success, and non-zero if an error occurs
  */
-int find_sensor_exceed_value(DBCONN *conn, sensor_value_t value, callback_t f);
+int find_sensor_exceed_value(DBCONN *conn, sensor_value_t value, callback_t f){
+	char *query;
+	char *err_msg = 0;
+
+	asprintf(&query, "SELECT * FROM %1s WHERE sensor_value > %2f", TO_STRING(TABLE_NAME), value);
+	int result = sqlite3_exec(conn, query, f,0, &err_msg);
+	free(query);
+	if (result != SQLITE_OK){
+		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+		return 1;
+	}
+	return 0;
+}
 
 /**
  * Write a SELECT query to return all sensor measurements having a timestamp 'ts'
