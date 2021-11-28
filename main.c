@@ -25,7 +25,7 @@ START_TEST(test_insert_sensor)
     DBCONN *result = init_connection(0);
     
     int check = insert_sensor(result, 5, 188, 27758);
-    ck_assert_msg(check == 1, "Error: expected result to to be 1");
+    ck_assert_msg(check == 0, "Error: expected result to to be 0");
 
 }
 END_TEST

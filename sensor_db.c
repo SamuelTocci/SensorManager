@@ -36,7 +36,7 @@ DBCONN *init_connection(char clear_up_flag){
 	if(clear_up_flag == 1){
 		asprintf(&query, "DROP TABLE IF EXISTS %1$s;"
 						"CREATE TABLE %1$s(Id Integer PRIMARY KEY AUTOINCREMENT, sensor_id Integer, sensor_value DECIMAL(4,2), timestamp TIMESTAMP);", TO_STRING(TABLE_NAME));
-		int result = sqlite3_exec(conn, query, 0,0, &err_msg);
+		sqlite3_exec(conn, query, 0,0, &err_msg);
 		free(query);
 	}
 	return conn;
@@ -66,15 +66,11 @@ int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_
 						,TO_STRING(TABLE_NAME), id, value, ts);
 	int result = sqlite3_exec(conn, query, 0,0, &err_msg);
 	free(query);
-	if (result == SQLITE_OK){
+	if (result != SQLITE_OK){
 		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
-		sqlite3_close(conn);
 		return 1;
 	}
 	return 0;
-		// INSERT INTO COMPANY (NAME,AGE,ADDRESS,SALARY)
-		// VALUES ( 'Paul', 32, 'California', 20000.00 );
-
 }
 
 /**
@@ -92,7 +88,19 @@ int insert_sensor_from_file(DBCONN *conn, FILE *sensor_data);
   * \param f function pointer to the callback method that will handle the result set
   * \return zero for success, and non-zero if an error occurs
   */
-int find_sensor_all(DBCONN *conn, callback_t f);
+int find_sensor_all(DBCONN *conn, callback_t f){
+	char *query;
+	char *err_msg = 0;
+
+	asprintf(&query, "SELECT * FROM %1s", TO_STRING(TABLE_NAME));
+	int result = sqlite3_exec(conn, query, f,0, &err_msg);
+	free(query);
+	if (result != SQLITE_OK){
+		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+		return 1;
+	}
+	return 0;
+}
 
 /**
  * Write a SELECT query to return all sensor measurements having a temperature of 'value'
@@ -102,7 +110,9 @@ int find_sensor_all(DBCONN *conn, callback_t f);
  * \param f function pointer to the callback method that will handle the result set
  * \return zero for success, and non-zero if an error occurs
  */
-int find_sensor_by_value(DBCONN *conn, sensor_value_t value, callback_t f);
+int find_sensor_by_value(DBCONN *conn, sensor_value_t value, callback_t f){
+	
+}
 
 /**
  * Write a SELECT query to return all sensor measurements of which the temperature exceeds 'value'
