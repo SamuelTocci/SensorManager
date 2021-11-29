@@ -1,5 +1,7 @@
 # Create your own targets that compile the application
-
+node:
+	gcc -g -o server -lpthread test_server.c lib/tcpsock.c
+	gcc -g -o client -lpthread sensor_node.c lib/tcpsock.c 
 
 # the files for ex2 will be ziped and are then ready to
 # be submitted to labtools.groept.be
