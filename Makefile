@@ -1,6 +1,6 @@
 # Create your own targets that compile the application
 HEADER=sensor_db.h
-SOURCE=sensor_db.c
+SOURCE=sensor_db.c lib/dplist.c data_mgr.c
 FLAGS= -g -std=c11 -Werror -lm $(shell pkg-config --cflags --libs check sqlite3)
 EXE=./build/storage_mgr
 
