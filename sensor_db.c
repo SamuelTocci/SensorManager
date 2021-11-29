@@ -19,19 +19,39 @@ DBCONN *init_connection(char clear_up_flag){
 	sqlite3 *conn;
 	char *err_msg = 0;
 	char *query;
-
-	int rc = sqlite3_open(TO_STRING(DB_NAME), &conn);
-	if (rc != SQLITE_OK){
-		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
-		sqlite3_close(conn);
-		free(query);
-		return NULL;
+	
+	int pipefd[2];
+	char buff;
+	if(pipe(pipefd) == -1){
+		exit(EXIT_FAILURE);
 	}
-	if(clear_up_flag == 1){
-		asprintf(&query, "DROP TABLE IF EXISTS %1$s;"
-						"CREATE TABLE %1$s(Id Integer PRIMARY KEY AUTOINCREMENT, sensor_id Integer, sensor_value DECIMAL(4,2), timestamp TIMESTAMP);", TO_STRING(TABLE_NAME));
-		sqlite3_exec(conn, query, 0,0, &err_msg);
-		free(query);
+
+	int pid = fork();
+
+	if(pid == 0){//child process
+		close(pipefd[1]); //close unused write end of pipe
+		while (read(pipefd[0], &buff, 1) > 0){
+			/* code */
+		}
+		
+		log_mgr(&pipefd[0]);
+	} else { //parent process
+		close(pipefd[0]); //close unused read end of pipe
+
+		int rc = sqlite3_open(TO_STRING(DB_NAME), &conn);
+		if (rc != SQLITE_OK){
+			//fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+			write(pipefd[1],sqlite3_errmsg(conn), sizeof(sqlite3_errmsg(conn)));
+			sqlite3_close(conn);
+			free(query);
+			return NULL;
+		}
+		if(clear_up_flag == 1){
+			asprintf(&query, "DROP TABLE IF EXISTS %1$s;"
+							"CREATE TABLE %1$s(Id Integer PRIMARY KEY AUTOINCREMENT, sensor_id Integer, sensor_value DECIMAL(4,2), timestamp TIMESTAMP);", TO_STRING(TABLE_NAME));
+			sqlite3_exec(conn, query, 0,0, &err_msg);
+			free(query);
+		}
 	}
 	return conn;
 }
@@ -125,6 +145,10 @@ int find_sensor_after_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f){
 		return 1;
 	}
 	return 0;
+}
+
+void log_mgr(void ** pipeReadEnd){
+	printf("Log: %s\n", pipeReadEnd);
 }
 
 #endif /* _SENSOR_DB_H_ */
