@@ -98,6 +98,6 @@ int find_sensor_by_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f);
  */
 int find_sensor_after_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f);
 
-void log_mgr(void ** pipeReadEnd);
+void log_mgr(char * pipeReadEnd);
 
 #endif /* _SENSOR_DB_H_ */

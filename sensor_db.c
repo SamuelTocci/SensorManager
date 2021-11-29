@@ -12,6 +12,8 @@
 #include "config.h"
 #include <sqlite3.h>
 #include "sensor_db.h"
+#include <unistd.h>
+#include <sys/wait.h>
 
 typedef int (*callback_t)(void *, int, char **, char **);
 
@@ -21,7 +23,7 @@ DBCONN *init_connection(char clear_up_flag){
 	char *query;
 	
 	int pipefd[2];
-	char buff;
+	char * buff;
 	if(pipe(pipefd) == -1){
 		exit(EXIT_FAILURE);
 	}
@@ -30,11 +32,17 @@ DBCONN *init_connection(char clear_up_flag){
 
 	if(pid == 0){//child process
 		close(pipefd[1]); //close unused write end of pipe
+		read(pipefd[0], &buff, 1);
+		printf("%s", buff);
 		while (read(pipefd[0], &buff, 1) > 0){
-			/* code */
+			//log_mgr(buff);
+			printf("%s\n",buff);
+
 		}
+		close(pipefd[0]);
+		printf("child\n");
+		_exit(EXIT_SUCCESS);
 		
-		log_mgr(&pipefd[0]);
 	} else { //parent process
 		close(pipefd[0]); //close unused read end of pipe
 
@@ -42,6 +50,7 @@ DBCONN *init_connection(char clear_up_flag){
 		if (rc != SQLITE_OK){
 			//fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
 			write(pipefd[1],sqlite3_errmsg(conn), sizeof(sqlite3_errmsg(conn)));
+			close(pipefd[1]);
 			sqlite3_close(conn);
 			free(query);
 			return NULL;
@@ -51,7 +60,13 @@ DBCONN *init_connection(char clear_up_flag){
 							"CREATE TABLE %1$s(Id Integer PRIMARY KEY AUTOINCREMENT, sensor_id Integer, sensor_value DECIMAL(4,2), timestamp TIMESTAMP);", TO_STRING(TABLE_NAME));
 			sqlite3_exec(conn, query, 0,0, &err_msg);
 			free(query);
+
 		}
+		printf("parent\n");
+		write(pipefd[1], err_msg, sizeof(err_msg));
+		close(pipefd[1]);
+		wait(NULL);
+		exit(EXIT_SUCCESS);
 	}
 	return conn;
 }
@@ -147,7 +162,7 @@ int find_sensor_after_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f){
 	return 0;
 }
 
-void log_mgr(void ** pipeReadEnd){
+void log_mgr(char * pipeReadEnd){
 	printf("Log: %s\n", pipeReadEnd);
 }
 
