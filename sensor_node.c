@@ -101,6 +101,7 @@ int main(int argc, char *argv[]) {
         bytes = sizeof(data.ts);
         if (tcp_send(client, (void *) &data.ts, &bytes) != TCP_NO_ERROR) exit(EXIT_FAILURE);
         LOG_PRINTF(data.id, data.value, data.ts);
+        printf("node data sent\n");
         sleep(sleep_time);
         UPDATE(i);
     }

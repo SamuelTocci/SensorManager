@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <sys/poll.h>
+#include "lib/tcpsock.h"
 
 typedef uint16_t sensor_id_t;
 typedef double sensor_value_t;

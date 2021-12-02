@@ -9,18 +9,20 @@
 #include <stdlib.h>
 #include "lib/dplist.h"
 #include "lib/tcpsock.h"
+#include <inttypes.h>
 #include <sys/poll.h>
 
 #define PORT 5678
-
-dplist_t * sockets;
 
 void socket_free(void ** socket){
     free(*socket);
 }
 
 void * socket_copy(void * socket){
-    return 0;
+    poll_t * copy = malloc(sizeof(poll_t));
+    copy->poll_fd = ((poll_t *)socket)->poll_fd;
+    copy->socket = ((poll_t *)socket)->socket;
+    return copy;
 }
 
 int socket_compare(void * socket1, void * socket2){
@@ -39,24 +41,54 @@ int socket_compare(void * socket1, void * socket2){
 
 void con_listen(){
     FILE * file = fopen(OUTPUT_NAME, "w"); //write to output file -> to datastream in final_assignment
+    dplist_t * sockets;
     sockets = dpl_create(socket_copy, socket_free, socket_compare);
 
     bool end = false;
 
-    tcpsock_t * server, * client;
+    tcpsock_t * tcp_server, * client;
+    poll_t server;
+    pollfd_t fd_server;
+    server.socket = tcp_server;
+    server.poll_fd = fd_server;
+
+    sockets = dpl_insert_at_index(sockets, &server,0,true);
     sensor_data_t data;
-    int bytes, result;
-    int socket_counter = 0; //these start variables copied from test_server template
-    if (tcp_passive_open(&server, PORT) != TCP_NO_ERROR) exit(EXIT_FAILURE);
+    int bytes, result; //these start variables copied from test_server template
+    if (tcp_passive_open(&(server.socket), PORT) != TCP_NO_ERROR) exit(EXIT_FAILURE);
     do{
-        socket_counter = dpl_size(sockets);
-        for (int i = 0; i < socket_counter; i++){ //go over each socket and read data
-            poll_t * current_poll = dpl_get_element_at_index(sockets, i); //keep track of current poll
-            //server checken en nieuwe connecties aanmaken
-            if(i == 0){
-                tcp_wait_for_connection(server, &client);
+        poll_t * current_poll = dpl_get_element_at_index(sockets, 0);
+        if(poll(&current_poll->poll_fd,1,0)>=0){
+            printf("in poll\n");
+            for (int i = 0; i< dpl_size(sockets); i++){ //go over each socket and read data
+                printf("before for\n");
+                current_poll = dpl_get_element_at_index(sockets, i);
+                printf("in for\n"); //keep track of current poll
+                //server checken en nieuwe connecties aanmaken, server staat vooraan in dplist
+                if(i == 0){ //server node om nieuwe connecties te aanvaarden
+                    tcp_wait_for_connection(current_poll->socket, &client);
+                    poll_t client_copy;
+                    client_copy.socket = client;
+                    int pos = dpl_size(sockets)+1;
+                    dpl_insert_at_index(sockets, &client_copy, pos, true);
+                    printf("in server node\n");
+
+                } else { //sockets die verbonden zijn overlopen
+                    // read sensor ID
+                    bytes = sizeof(data.id);
+                    result = tcp_receive(client, (void *) &data.id, &bytes);
+                    // read temperature
+                    bytes = sizeof(data.value);
+                    result = tcp_receive(client, (void *) &data.value, &bytes);
+                    // read timestamp
+                    bytes = sizeof(data.ts);
+                    result = tcp_receive(client, (void *) &data.ts, &bytes);
+                    if ((result == TCP_NO_ERROR) && bytes) {
+                        printf("sensor id = %" PRIu16 " - temperature = %g - timestamp = %ld\n",
+                        data.id, data.value,(long int) data.ts);
+                    }
+                }
             }
-            //sockets die verbonden zijn overlopen
         }
         
     } while (end == false);

@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "config.h": "c",
-        "poll.h": "c"
+        "poll.h": "c",
+        "tcpsock.h": "c",
+        "stdlib.h": "c",
+        "dplist.h": "c"
     }
 }

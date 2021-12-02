@@ -1,10 +1,10 @@
 # Create your own targets that compile the application
-sequential:
+seq:
 	gcc -g -o server -lpthread test_server.c lib/tcpsock.c
 	gcc -g -o client -lpthread sensor_node.c lib/tcpsock.c 
 
 par:
-	gcc -g -o server -lpthread connmgr.c lib/tcpsock.c lib/dplist.c
+	gcc -g -o server -lpthread main.c connmgr.c lib/tcpsock.c lib/dplist.c
 	gcc -g -o client -lpthread sensor_node.c lib/tcpsock.c 
 # the files for ex2 will be ziped and are then ready to
 # be submitted to labtools.groept.be
