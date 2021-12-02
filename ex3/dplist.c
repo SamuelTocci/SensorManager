@@ -92,7 +92,11 @@ dplist_t *dpl_insert_at_index(dplist_t *list, void *element, int index, bool ins
 
     list_node = malloc(sizeof(dplist_node_t));
     DPLIST_ERR_HANDLER(list_node == NULL, DPLIST_MEMORY_ERROR);
-    list_node->element = element;
+    if (insert_copy){
+        list_node->element = list->element_copy(element);
+    } else {
+        list_node->element = element;
+    }
     // pointer drawing breakpoint
     if (list->head == NULL) { // covers case 1
         list_node->prev = NULL;
@@ -124,8 +128,6 @@ dplist_t *dpl_insert_at_index(dplist_t *list, void *element, int index, bool ins
         }
     }
     return list;
-    //TODO: code aanpassen
-
 }
 
 dplist_t *dpl_remove_at_index(dplist_t *list, int index, bool free_element) {

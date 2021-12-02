@@ -4,7 +4,7 @@ EXE=build/dplist_test
 
 FLAGS = -g -std=c11 -Werror -lm $(shell pkg-config --cflags --libs check)
 
-test :
+test:
 	@echo -e '\n*******************************'
 	@echo -e '*** Compiling for UNIT TEST ***'
 	@echo -e '*******************************'
