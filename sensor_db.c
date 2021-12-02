@@ -21,23 +21,25 @@ DBCONN *init_connection(char clear_up_flag){
 	sqlite3 *conn;
 	char *err_msg = 0;
 	char *query;
+	FILE *fptr;
+
 	
-	int pipefd[2];
-	char * buff;
-	if(pipe(pipefd) == -1){
+	int pipefd[2], bytes_amount;
+	char buff[16];
+	if(pipe(pipefd) < 0){
 		exit(EXIT_FAILURE);
 	}
 
 	int pid = fork();
-
 	if(pid == 0){//child process
 		close(pipefd[1]); //close unused write end of pipe
-		read(pipefd[0], &buff, 1);
-		printf("%s", buff);
-		while (read(pipefd[0], &buff, 1) > 0){
+		//fptr = fopen("./log.txt","w");
+		printf("buff: %s\n", buff);
+		//fwrite(buff, sizeof(buff), 1, fptr);
+		while ((bytes_amount = read(pipefd[0], buff, 1)) > 0){
 			//log_mgr(buff);
-			printf("%s\n",buff);
-
+			printf("%s\0",buff);
+			//fwrite(buff, sizeof(buff), 1, fptr);
 		}
 		close(pipefd[0]);
 		printf("child\n");
@@ -51,6 +53,7 @@ DBCONN *init_connection(char clear_up_flag){
 			//fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
 			write(pipefd[1],sqlite3_errmsg(conn), sizeof(sqlite3_errmsg(conn)));
 			close(pipefd[1]);
+			wait(NULL);
 			sqlite3_close(conn);
 			free(query);
 			return NULL;
@@ -60,10 +63,14 @@ DBCONN *init_connection(char clear_up_flag){
 							"CREATE TABLE %1$s(Id Integer PRIMARY KEY AUTOINCREMENT, sensor_id Integer, sensor_value DECIMAL(4,2), timestamp TIMESTAMP);", TO_STRING(TABLE_NAME));
 			sqlite3_exec(conn, query, 0,0, &err_msg);
 			free(query);
-
 		}
 		printf("parent\n");
-		write(pipefd[1], err_msg, sizeof(err_msg));
+		// char * succes = "Database succesfully opened";
+		// write(pipefd[1], succes, sizeof(succes));
+		//err_msg = "amen";
+		//write(pipefd[1], err_msg, sizeof(err_msg)); //err_msg is null atm
+		char* msg1 = "hello, world #1";
+		write(pipefd[1],msg1,16);
 		close(pipefd[1]);
 		wait(NULL);
 		exit(EXIT_SUCCESS);

@@ -14,7 +14,7 @@ void teardown(void) {}
 
 START_TEST(test_init_connect)
 {
-    DBCONN *result = init_connection(0);
+    DBCONN *result = init_connection(1);
     ck_assert_msg(result != NULL, "Error: expected result to not be NULL");
     disconnect(result); //to avoid mem leak
 }
