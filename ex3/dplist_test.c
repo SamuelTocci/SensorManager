@@ -104,6 +104,9 @@ START_TEST(test_ListInsertAtIndexListNULL)
         my_element_t * result_ptr = dpl_get_element_at_index(list,-1);
         printf("%s\n",result_ptr->name);
 
+        result_ptr = dpl_get_element_at_reference(list,dpl_get_reference_at_index(list, 0));
+        printf("%s\n",result_ptr->name);
+
         ck_assert_msg(size == 1, "Failure: expected list to be 1");
 
         dpl_free(&list,false);
