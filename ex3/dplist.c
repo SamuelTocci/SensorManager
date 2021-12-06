@@ -146,9 +146,9 @@ dplist_t *dpl_remove_at_index(dplist_t *list, int index, bool free_element) {
 
     if (list == NULL || dpl_size(list) == 0) return list;//if there is nothing to delete, don't delete
 
-    // dplist_node_t * list_node = dpl_get_reference_at_index(list, index);
-    dplist_node_t * list_node;
-    list_node = list->head->next;
+    dplist_node_t * list_node = dpl_get_reference_at_index(list, index);
+    // dplist_node_t * list_node;
+    // list_node = list->head->next;
     //TODO: getref at index fixen
 
     if(index <=0){
@@ -192,9 +192,9 @@ int dpl_size(dplist_t *list) {
 
 void *dpl_get_element_at_index(dplist_t *list, int index) {
     dplist_node_t *curr_node = list->head;
-    if(curr_node->next != NULL) curr_node = curr_node->next; //goto index 0 if there is at least 1 element
+    // if(curr_node->next != NULL) curr_node = curr_node->next; //goto index 0 if there is at least 1 element
     for (int i = 0; i < index; i++){
-        curr_node = curr_node->next;
+        if(curr_node->next != NULL) curr_node = curr_node->next;
     }
     return curr_node->element;
 }
@@ -213,15 +213,12 @@ int dpl_get_index_of_element(dplist_t *list, void *element) {
 }
 
 dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
-    dplist_node_t *dummy = malloc(sizeof(dplist_node_t));
-    DPLIST_ERR_HANDLER(list == NULL, DPLIST_INVALID_ERROR);
-
-    if (list->head == NULL || list->head->next == NULL) return NULL;
-    dummy = list->head->next;
-    for (int count = 0; dummy->next != NULL; dummy = dummy->next, count++) {
-        if (count >= index) return dummy;
+    dplist_node_t *curr_node = list->head;
+    // if(curr_node->next != NULL) curr_node = curr_node->next; //goto index 0 if there is at least 1 element
+    for (int i = 0; i < index; i++){
+        if(curr_node->next != NULL) curr_node = curr_node->next;
     }
-    return dummy;
+    return curr_node;
 }
 
 void *dpl_get_element_at_reference(dplist_t *list, dplist_node_t *reference) {

@@ -88,19 +88,21 @@ END_TEST
 
 START_TEST(test_ListInsertAtIndexListNULL)
     {
-        my_element_t * test_ptr = malloc(sizeof(my_element_t));
-        test_ptr->id = 5;
-        test_ptr->name = "john";
+        my_element_t * test_ptr0 = malloc(sizeof(my_element_t));
+        test_ptr0->id = 5;
+        test_ptr0->name = "ptr 0";
+        my_element_t * test_ptr1 = malloc(sizeof(my_element_t));
+        test_ptr1->name = "ptr 1";
         dplist_t * list = dpl_create(element_copy, element_free, element_compare);
-        dpl_insert_at_index(list, test_ptr, -1, true);
-        dpl_insert_at_index(list, test_ptr, -1, true);
-        dpl_remove_at_index(list, 0,true);
+        dpl_insert_at_index(list, test_ptr1, -1, true);
+        dpl_insert_at_index(list, test_ptr0, -1, true);
+        dpl_remove_at_index(list, -1,true);
 
         int size = dpl_size(list);
         printf("%i\n",size);
 
-        //my_element_t * result_ptr = dpl_get_element_at_index(list,-1);
-        //printf("%s\n",result_ptr->name);
+        my_element_t * result_ptr = dpl_get_element_at_index(list,-1);
+        printf("%s\n",result_ptr->name);
 
         ck_assert_msg(size == 1, "Failure: expected list to be 1");
 
