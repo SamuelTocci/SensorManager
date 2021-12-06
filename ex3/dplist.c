@@ -147,9 +147,6 @@ dplist_t *dpl_remove_at_index(dplist_t *list, int index, bool free_element) {
     if (list == NULL || dpl_size(list) == 0) return list;//if there is nothing to delete, don't delete
 
     dplist_node_t * list_node = dpl_get_reference_at_index(list, index);
-    // dplist_node_t * list_node;
-    // list_node = list->head->next;
-    //TODO: getref at index fixen
 
     if(index <=0){
         if(list_node->next != NULL){ //if list bigger than 1
@@ -171,6 +168,23 @@ dplist_t *dpl_remove_at_index(dplist_t *list, int index, bool free_element) {
     }
     else{ //index > 0
         //TODO: index >0 bijvoegen
+        if(list_node->next == NULL){ //node is at end of list
+            list_node->prev->next = NULL;
+            //handle cut out node
+            list_node->prev = NULL;
+            if(free_element) list->element_free(list_node->element);
+            list_node->element = NULL;
+            list_node = NULL;
+        } else { //node somewhere inside of list
+            list_node->prev->next = list_node->next;
+            list_node->next->prev = list_node->prev;
+            //handle cut out node
+            if(free_element) list->element_free(list_node->element);
+            list_node->prev = NULL;
+            list_node->next = NULL;
+            list_node->element = NULL;
+            list_node = NULL;
+        }
     }
     free(list_node);
     return list;

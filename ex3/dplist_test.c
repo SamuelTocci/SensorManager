@@ -96,7 +96,7 @@ START_TEST(test_ListInsertAtIndexListNULL)
         dplist_t * list = dpl_create(element_copy, element_free, element_compare);
         dpl_insert_at_index(list, test_ptr1, -1, true);
         dpl_insert_at_index(list, test_ptr0, -1, true);
-        dpl_remove_at_index(list, -1,true);
+        dpl_remove_at_index(list, 1,true);
 
         int size = dpl_size(list);
         printf("%i\n",size);
