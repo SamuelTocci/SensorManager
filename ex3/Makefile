@@ -19,6 +19,8 @@ valgrind :
 	CK_FORK=no valgrind --leak-check=full $(EXE)
 
 gdb :
+	mkdir -p build
+	gcc $(SOURCE) -o $(EXE) $(FLAGS)
 	CK_FORK=no gdb $(EXE)
 
 .PHONY : clean check

@@ -21,18 +21,14 @@ int element_compare(void * x, void * y);
 
 void * element_copy(void * element) {
     my_element_t* copy = malloc(sizeof (my_element_t));
-    char* new_name;
-    asprintf(&new_name,"%s",((my_element_t*)element)->name);
     assert(copy != NULL);
     copy->id = ((my_element_t*)element)->id;
-    copy->name = new_name;
+    copy->name = ((my_element_t*)element)->name;
     return (void *) copy;
 }
 
 void element_free(void ** element) {
-    free((((my_element_t*)*element))->name);
-    free(*element);
-    *element = NULL;
+    free(element);
 }
 
 int element_compare(void * x, void * y) {
@@ -85,29 +81,40 @@ START_TEST(test_ListFree)
         dpl_insert_at_index(list, dummy1, 0, false);
         dpl_insert_at_index(list, dummy2, 1, false);
         dpl_insert_at_index(list, dummy3, 2, false);
-        dpl_free(&list, true);
+        dpl_free(&list, false);
         ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
     }
 END_TEST
 
 START_TEST(test_ListInsertAtIndexListNULL)
     {
-        int test = 5;
-        int * test_ptr = &test;
-        // Test inserting at index -1
-        dplist_t *result = dpl_insert_at_index(NULL, test_ptr, -1, false);
-        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
-        dpl_free(&result,true);
+        my_element_t * test_ptr = malloc(sizeof(my_element_t));
+        test_ptr->id = 5;
+        test_ptr->name = "john";
+        dplist_t * list = dpl_create(element_copy, element_free, element_compare);
+        dpl_insert_at_index(list, test_ptr, -1, true);
+        dpl_insert_at_index(list, test_ptr, -1, true);
+        dpl_remove_at_index(list, 0,true);
 
-        // TODO : Test inserting at index 0
-        result = dpl_insert_at_index(NULL, test_ptr, 0, false);
-        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
-        dpl_free(&result,true);
+        int size = dpl_size(list);
+        printf("%i\n",size);
 
-        // TODO : Test inserting at index 99
-        result = dpl_insert_at_index(NULL, test_ptr, 99, false);
-        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
-        dpl_free(&result,true);
+        //my_element_t * result_ptr = dpl_get_element_at_index(list,-1);
+        //printf("%s\n",result_ptr->name);
+
+        ck_assert_msg(size == 1, "Failure: expected list to be 1");
+
+        dpl_free(&list,false);
+
+        // // TODO : Test inserting at index 0
+        // result = dpl_insert_at_index(NULL, test_ptr, 0, false);
+        // ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+        // dpl_free(&result,true);
+
+        // // TODO : Test inserting at index 99
+        // result = dpl_insert_at_index(NULL, test_ptr, 99, false);
+        // ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+        // dpl_free(&result,true);
     }
 END_TEST
 
@@ -193,11 +200,11 @@ int main(void) {
 
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
-    tcase_add_test(tc1_1, test_ListFree);
+    //tcase_add_test(tc1_1, test_ListFree);
     tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
-    tcase_add_test(tc1_1, test_ListRemoveAtIndexListNull);
-    tcase_add_test(tc1_1, test_ListRemoveAtIndexListEmpty);
-    tcase_add_test(tc1_1, test_ListRemoveAtIndexListOne);
+    // tcase_add_test(tc1_1, test_ListRemoveAtIndexListNull);
+    // tcase_add_test(tc1_1, test_ListRemoveAtIndexListEmpty);
+    // tcase_add_test(tc1_1, test_ListRemoveAtIndexListOne);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);
