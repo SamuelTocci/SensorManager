@@ -100,18 +100,20 @@ START_TEST(test_ListInsertAtIndexListNULL)
         dpl_insert_at_index(list, test_ptr0, 1, false);
         dpl_insert_at_index(list, test_ptr1, 2, true);
 
-        // dpl_remove_at_index(list, 99, true);
-        // dpl_remove_at_index(list, -1, true); 
-        // dpl_remove_at_index(list, 0, true);
+        dpl_remove_at_index(list, 99, true);
+        dpl_remove_at_index(list, -1, true); 
+        dpl_remove_at_index(list, 0, true);
 
         my_element_t * result_el = dpl_get_element_at_index(list, 1);
-        printf("element at index: %s\n",result_el->name );
-
-        // int index = dpl_get_index_of_element(list, test_ptr0);
-        // printf("index of element: %i\n",index );
+        if(result_el != NULL) printf("element at index: %s\n",result_el->name );
 
         int size = dpl_size(list);
         printf("size: %i\n",size);
+        dpl_free(&list,true);
+
+        ck_assert_msg(size == 0, "Failure: expected list to be 0");
+        // int index = dpl_get_index_of_element(list, test_ptr0);
+        // printf("index of element: %i\n",index );
 
         // my_element_t * result_ptr = dpl_get_element_at_index(list,-1);
         // printf("%s\n",result_ptr->name);
@@ -119,8 +121,6 @@ START_TEST(test_ListInsertAtIndexListNULL)
         // result_ptr = dpl_get_element_at_reference(list,dpl_get_reference_at_index(list, 0));
         // printf("%s\n",result_ptr->name);
 
-        dpl_free(&list,true);
-        ck_assert_msg(size == 1, "Failure: expected list to be 1");
     }
 END_TEST
 
