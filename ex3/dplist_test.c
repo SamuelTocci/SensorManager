@@ -100,16 +100,15 @@ START_TEST(test_ListInsertAtIndexListNULL)
         dpl_insert_at_index(list, test_ptr0, 1, false);
         dpl_insert_at_index(list, test_ptr1, 2, true);
 
-        dplist_node_t * fake_ref = malloc(sizeof(dplist_node_t*));
+        // dpl_remove_at_index(list, 99, true);
+        // dpl_remove_at_index(list, -1, true); 
+        // dpl_remove_at_index(list, 0, true);
 
-        void * ref_ptr = fake_ref;
+        my_element_t * result_el = dpl_get_element_at_index(list, 1);
+        printf("element at index: %s\n",result_el->name );
 
-        my_element_t * result_element = dpl_get_element_at_reference(list, ref_ptr);
-        if(result_element == NULL) printf("victory\n");
-        free(fake_ref);
-
-        int index = dpl_get_index_of_element(list, test_ptr0);
-        printf("index of element: %i\n",index );
+        // int index = dpl_get_index_of_element(list, test_ptr0);
+        // printf("index of element: %i\n",index );
 
         int size = dpl_size(list);
         printf("size: %i\n",size);
