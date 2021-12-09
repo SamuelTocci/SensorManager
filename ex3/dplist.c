@@ -209,7 +209,7 @@ void *dpl_get_element_at_index(dplist_t *list, int index) {
 int dpl_get_index_of_element(dplist_t *list, void *element) {
     if(list == NULL)return -1;
     dplist_node_t *curr_node = list->head;
-    for (int index = 0; index < dpl_size(list)-1 ; index++){
+    for (int index = 0; index < dpl_size(list) ; index++){
         void *curr_element = curr_node->element;
         if(list->element_compare(curr_element, element) == 0){ //==0 betekent dat ze gelijk zijn
             return index;

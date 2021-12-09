@@ -95,19 +95,21 @@ START_TEST(test_ListInsertAtIndexListNULL)
         my_element_t * test_ptr1 = malloc(sizeof(my_element_t));
         test_ptr1->name = "ptr 1";
         dplist_t * list = dpl_create(element_copy, element_free, element_compare);
-        dpl_insert_at_index(list, test_ptr1, -1, false);
-        dpl_insert_at_index(list, test_ptr0, -1, false);
-        dpl_insert_at_index(list, test_ptr0, -1, true);
-        dpl_remove_at_index(list,2,true);
+        dpl_insert_at_index(list, test_ptr1, 0, false);
+        dpl_insert_at_index(list, test_ptr0, 1, false);
+        dpl_insert_at_index(list, test_ptr1, 2, true);
+
+        int index = dpl_get_index_of_element(list, test_ptr1);
+        printf("%i\n",index );
 
         int size = dpl_size(list);
         printf("%i\n",size);
 
-        my_element_t * result_ptr = dpl_get_element_at_index(list,-1);
-        printf("%s\n",result_ptr->name);
+        // my_element_t * result_ptr = dpl_get_element_at_index(list,-1);
+        // printf("%s\n",result_ptr->name);
 
-        result_ptr = dpl_get_element_at_reference(list,dpl_get_reference_at_index(list, 0));
-        printf("%s\n",result_ptr->name);
+        // result_ptr = dpl_get_element_at_reference(list,dpl_get_reference_at_index(list, 0));
+        // printf("%s\n",result_ptr->name);
 
         dpl_free(&list,true);
         ck_assert_msg(size == 1, "Failure: expected list to be 1");
@@ -196,8 +198,8 @@ int main(void) {
 
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
-    tcase_add_test(tc1_1, test_ListFree);
-    // tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
+    // tcase_add_test(tc1_1, test_ListFree);
+    tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
     // tcase_add_test(tc1_1, test_ListRemoveAtIndexListNull);
     // tcase_add_test(tc1_1, test_ListRemoveAtIndexListEmpty);
     // tcase_add_test(tc1_1, test_ListRemoveAtIndexListOne);
