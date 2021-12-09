@@ -72,27 +72,25 @@ void dpl_free(dplist_t **list, bool free_element) {
 
     if(*list == NULL) return;
     dplist_node_t * overstep_node;
-    if((*list)->head == NULL){
-        free(*list);
-        return;
-    } else {
-        while((*list)->head->next != NULL){
+    if((*list)->head != NULL) {
+        while((*list)->head->next != NULL){ //as long as list has 1 element
             if((*list)->head->next->next != NULL){
                 overstep_node = (*list)->head->next->next;
             } else overstep_node = NULL;
             if(free_element){
-                (*list)->element_free((*list)->head->next->element);
+                (*list)->element_free(&(*list)->head->next->element);
                 //TODO: dit deel werkt niet
             }
             (*list)->head->next->prev = NULL;
             (*list)->head->next->element = NULL;
+            free((*list)->head->next);
             (*list)->head->next = overstep_node;
         }
-        (*list)->head = NULL;
     }
     (*list)->element_compare = NULL;
     (*list)->element_free = NULL;
     (*list)->element_copy = NULL;
+    (*list)->head = NULL;
     free(*list);
     *list = NULL;
 }
