@@ -93,17 +93,26 @@ START_TEST(test_ListInsertAtIndexListNULL)
         test_ptr0->id = 5;
         test_ptr0->name = "ptr 0";
         my_element_t * test_ptr1 = malloc(sizeof(my_element_t));
+        test_ptr1->id = 25;
         test_ptr1->name = "ptr 1";
         dplist_t * list = dpl_create(element_copy, element_free, element_compare);
         dpl_insert_at_index(list, test_ptr1, 0, false);
         dpl_insert_at_index(list, test_ptr0, 1, false);
         dpl_insert_at_index(list, test_ptr1, 2, true);
 
-        int index = dpl_get_index_of_element(list, test_ptr1);
-        printf("%i\n",index );
+        dplist_node_t * fake_ref = malloc(sizeof(dplist_node_t*));
+
+        void * ref_ptr = fake_ref;
+
+        my_element_t * result_element = dpl_get_element_at_reference(list, ref_ptr);
+        if(result_element == NULL) printf("victory\n");
+        free(fake_ref);
+
+        int index = dpl_get_index_of_element(list, test_ptr0);
+        printf("index of element: %i\n",index );
 
         int size = dpl_size(list);
-        printf("%i\n",size);
+        printf("size: %i\n",size);
 
         // my_element_t * result_ptr = dpl_get_element_at_index(list,-1);
         // printf("%s\n",result_ptr->name);

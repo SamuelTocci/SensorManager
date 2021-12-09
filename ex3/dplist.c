@@ -232,7 +232,15 @@ dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
 }
 
 void *dpl_get_element_at_reference(dplist_t *list, dplist_node_t *reference) {
-    return reference->element;
+    if(list == NULL || reference == NULL)return NULL;
+    void * curr_ref = NULL;
+    for (int index = 0; index < dpl_size(list); index++){
+        if(dpl_get_reference_at_index(list, index) ==  reference){ //==0 betekent dat ze gelijk zijnturn index;
+            curr_ref = reference;
+        }
+    }
+    if(curr_ref == NULL) return NULL;
+    return ((dplist_node_t *)curr_ref)->element;
 }
 
 
