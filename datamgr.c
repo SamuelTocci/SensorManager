@@ -43,13 +43,15 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data){
         for (int i = 0; i < RUN_AVG_LENGTH; i++){ //find empty spot in run_value[]
             if(element->run_value[RUN_AVG_LENGTH-1] != 0){
                 sensor_value_t avg = datamgr_get_avg(element->sensor_id);
-                if (avg < 99 ){ //TODO: SET_MIN_TEMP not working
+                if (avg <  SET_MIN_TEMP){ //TODO: SET_MIN_TEMP not working
                     //do something
-                    printf ("id = %d value = %f room = %d %ld\n", element->sensor_id, avg, element->room_id, sensor_data.ts);
+                    printf("under min: %f\n", avg);
+                    //printf ("id = %d value = %f room = %d %ld\n", element->sensor_id, avg, element->room_id, sensor_data.ts);
                 }
-                if (avg > 99 ){ //TODO: SET_MAX_TEMP not working
+                if (avg > SET_MAX_TEMP){ //TODO: SET_MAX_TEMP not working
                     //do something
-                    printf ("id = %d value = %f room = %d %ld\n", element->sensor_id, avg, element->room_id, sensor_data.ts);
+                    printf("over max: %f\n",avg);
+                    //printf ("id = %d value = %f room = %d %ld\n", element->sensor_id, avg, element->room_id, sensor_data.ts);
                 }
                 for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
                     element->run_value[j] = 0;
@@ -76,7 +78,8 @@ uint16_t datamgr_get_room_id(sensor_id_t sensor_id){
 sensor_value_t datamgr_get_avg(sensor_id_t sensor_id){
     sensor_t * element = datamgr_get_sensor_with_id(sensor_id);
     if(element == NULL)return -1;
-    int avg = 0;
+    if(element->run_value[RUN_AVG_LENGTH -1] == 0)return 0;
+    float avg = 0;
     for (int i = 0; i < RUN_AVG_LENGTH ; i++){
         sensor_value_t value = element->run_value[i];
         avg += value;
