@@ -72,25 +72,20 @@ void dpl_free(dplist_t **list, bool free_element) {
 
     if(*list == NULL) return;
     dplist_node_t * overstep_node;
-    if((*list)->head != NULL) {
-        while((*list)->head->next != NULL){ //as long as list has 1 element
-            if((*list)->head->next->next != NULL){
-                overstep_node = (*list)->head->next->next;
-            } else overstep_node = NULL;
-            if(free_element){
-                (*list)->element_free(&(*list)->head->next->element);
-                //TODO: dit deel werkt niet
-            }
-            (*list)->head->next->prev = NULL;
-            (*list)->head->next->element = NULL;
-            free((*list)->head->next);
-            (*list)->head->next = overstep_node;
-        }
+    while((*list)->head != NULL){
+        if((*list)->head->next != NULL) overstep_node = (*list)->head->next;
+        else overstep_node = NULL;
+
+        if(free_element)(*list)->element_free(&(*list)->head->element);
+        (*list)->head->element = NULL;
+        (*list)->head->next = NULL; //prev of head is already null
+        free((*list)->head);
+        (*list)->head = overstep_node; //head = NULL = overstepnode when
     }
+
     (*list)->element_compare = NULL;
     (*list)->element_free = NULL;
     (*list)->element_copy = NULL;
-    (*list)->head = NULL;
     free(*list);
     *list = NULL;
 }
@@ -149,42 +144,42 @@ dplist_t *dpl_remove_at_index(dplist_t *list, int index, bool free_element) {
     if(index <=0){
         if(list_node->next != NULL){ //if list bigger than 1
             //link head with next node
-            list_node->next->prev = list->head;
+            list_node->next->prev = NULL;
             list->head = list_node->next;
             //handle cut out node
-            if(free_element) list->element_free(list_node->element);
+            if(free_element) list->element_free(&list_node->element);
             list_node->prev = NULL;
             list_node->next = NULL;
-            list_node->element = NULL;
-            list_node = NULL;
         } else{ //if list only 1 element
-            list->head->next = NULL;
             //handle cut out node
-            if(free_element) list->element_free(list_node->element);
-            list_node->prev = NULL;
+            if(free_element) list->element_free(&list_node->element);
+            list->head = NULL;
         }
     }
     else{ //index > 0
-        //TODO: index >0 bijvoegen
-        if(list_node->next == NULL){ //node is at end of list
+        if(list_node->next == NULL && list_node->prev != NULL){ //node is at end of list
             list_node->prev->next = NULL;
             //handle cut out node
             list_node->prev = NULL;
-            if(free_element) list->element_free(list_node->element);
+            if(free_element) list->element_free(&list_node->element);
             list_node->element = NULL;
-            list_node = NULL;
-        } else { //node somewhere inside of list
+        }
+        if(list_node->next != NULL && list_node->prev != NULL) { //node somewhere inside of list
             list_node->prev->next = list_node->next;
             list_node->next->prev = list_node->prev;
             //handle cut out node
-            if(free_element) list->element_free(list_node->element);
+            if(free_element) list->element_free(&list_node->element);
             list_node->prev = NULL;
             list_node->next = NULL;
             list_node->element = NULL;
-            list_node = NULL;
+        }
+        if(list_node->next == NULL && dpl_size(list) == 1){ //only 1 item in list
+            //handle cut out node
+            if(free_element) list->element_free(&list_node->element);
         }
     }
     free(list_node);
+    list_node = NULL;
     return list;
 }
 
@@ -203,8 +198,8 @@ int dpl_size(dplist_t *list) {
 }
 
 void *dpl_get_element_at_index(dplist_t *list, int index) {
+    if(list->head == NULL) return NULL;
     dplist_node_t *curr_node = list->head;
-    // if(curr_node->next != NULL) curr_node = curr_node->next; //goto index 0 if there is at least 1 element
     for (int i = 0; i < index; i++){
         if(curr_node->next != NULL) curr_node = curr_node->next;
     }
@@ -215,22 +210,25 @@ int dpl_get_index_of_element(dplist_t *list, void *element) {
     if(list == NULL)return -1;
     dplist_node_t *curr_node = list->head;
     for (int index = 0; index < dpl_size(list)-1 ; index++){
-        curr_node = curr_node->next;
         void *curr_element = curr_node->element;
-        if(list->element_compare(curr_element, element) == 0){ //==0 betekend dat ze gelijk zijn
+        if(list->element_compare(curr_element, element) == 0){ //==0 betekent dat ze gelijk zijn
             return index;
         }
+        curr_node = curr_node->next;
     }
     return -1;
 }
 
 dplist_node_t *dpl_get_reference_at_index(dplist_t *list, int index) {
-    dplist_node_t *curr_node = list->head;
-    // if(curr_node->next != NULL) curr_node = curr_node->next; //goto index 0 if there is at least 1 element
-    for (int i = 0; i < index; i++){
-        if(curr_node->next != NULL) curr_node = curr_node->next;
+    int count;
+    dplist_node_t *dummy;
+    DPLIST_ERR_HANDLER(list == NULL, DPLIST_INVALID_ERROR);
+    if (list->head == NULL) return NULL;
+    for (dummy = list->head, count = 0; dummy->next != NULL; dummy = dummy->next, count++) {
+        if (count >= index) return dummy;
     }
-    return curr_node;
+    return dummy;
+
 }
 
 void *dpl_get_element_at_reference(dplist_t *list, dplist_node_t *reference) {
