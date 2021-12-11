@@ -163,34 +163,46 @@ START_TEST(test_ListRemoveAtIndexListEmpty)
     }
 END_TEST
 
-START_TEST(test_ListRemoveAtIndexListOne)
+START_TEST(test_ListProf)
     {
-        dplist_t * listCompare = dpl_create(element_copy, element_free, element_compare);
-        dplist_t * result;
-
         dplist_t * list = dpl_create(element_copy, element_free, element_compare);
-        my_element_t *dummy = malloc(sizeof(my_element_t));
-        dpl_insert_at_index(list,dummy,-1, false);
-        result = dpl_remove_at_index(list, -1, false);
-        ck_assert_msg(result == listCompare, "Failure: expected list to be empty");
 
-        // list = dpl_create(element_copy, element_free, element_compare);
-        // dummy = malloc(sizeof(my_element_t));
-        // dpl_insert_at_index(list,dummy,-1, false);
-        // result = dpl_remove_at_index(list, 0, false);
-        // ck_assert_msg(result == listCompare, "Failure: expected list to be empty");
+        my_element_t * a = malloc(sizeof(my_element_t));
+        a->name = "x";
+        my_element_t * b = malloc(sizeof(my_element_t));
+        b->name = "y";
+        my_element_t * c = malloc(sizeof(my_element_t));
+        c->name = "z";
 
-        // list = dpl_create(element_copy, element_free, element_compare);
-        // dummy = malloc(sizeof(my_element_t));
-        // dpl_insert_at_index(list,dummy,-1, false);
-        // result = dpl_remove_at_index(list, 99, false);
-        // ck_assert_msg(result == listCompare, "Failure: expected list to be empty");
+        list = dpl_remove_at_index(list,0,false);
 
-        // list = dpl_create(element_copy, element_free, element_compare);
-        // dummy = malloc(sizeof(my_element_t));
-        // dpl_insert_at_index(list,dummy,-1, false);
-        // result = dpl_remove_at_index(list, 1, true);
-        // ck_assert_msg(result == listCompare, "Failure: expected list to be empty");
+        int size = dpl_size(list);
+        printf("before insert a on 0: %i\n",size );
+        list = dpl_insert_at_index(list,a,0,false); //val
+        size = dpl_size(list);
+        printf("before insert b on 5: %i\n",size );
+        list = dpl_insert_at_index(list,b,5,false);
+        size = dpl_size(list);
+        printf("before insert c on -1: %i\n",size );
+        list = dpl_insert_at_index(list,c,-1,false);
+
+        size = dpl_size(list);
+        printf("before remove on -10: %i\n",size );
+        list = dpl_remove_at_index(list,-10,true); //removing
+        //free(c);
+        size = dpl_size(list);
+        printf("before remove on 7: %i\n",size );
+        list = dpl_remove_at_index(list,7,true); //size becomes 0 should be 1
+        //free(b);
+        size = dpl_size(list);
+        printf("before remove on 7: %i\n",size );
+        list = dpl_remove_at_index(list,7,true);
+
+        size = dpl_size(list); //segmentation fault op lege list
+        printf("end: %i\n",size );
+
+        dpl_free(&list, true);
+        ck_assert_msg(size == 0, "Failure: after inserting 3 elements and removing them expected size to be 0 but was %d\n",size);
     }
 END_TEST
 
@@ -207,10 +219,10 @@ int main(void) {
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
     // tcase_add_test(tc1_1, test_ListFree);
-    tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
+    // tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
     // tcase_add_test(tc1_1, test_ListRemoveAtIndexListNull);
     // tcase_add_test(tc1_1, test_ListRemoveAtIndexListEmpty);
-    // tcase_add_test(tc1_1, test_ListRemoveAtIndexListOne);
+    tcase_add_test(tc1_1, test_ListProf);
     // Add other tests here...
 
     srunner_run_all(sr, CK_VERBOSE);

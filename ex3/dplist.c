@@ -164,7 +164,7 @@ dplist_t *dpl_remove_at_index(dplist_t *list, int index, bool free_element) {
             if(free_element) list->element_free(&list_node->element);
             list_node->element = NULL;
         }
-        if(list_node->next != NULL && list_node->prev != NULL) { //node somewhere inside of list
+        else if(list_node->next != NULL && list_node->prev != NULL) { //node somewhere inside of list
             list_node->prev->next = list_node->next;
             list_node->next->prev = list_node->prev;
             //handle cut out node
@@ -173,9 +173,10 @@ dplist_t *dpl_remove_at_index(dplist_t *list, int index, bool free_element) {
             list_node->next = NULL;
             list_node->element = NULL;
         }
-        if(list_node->next == NULL && dpl_size(list) == 1){ //only 1 item in list
+        else if(list_node->next == NULL && dpl_size(list) == 1){ //only 1 item in list
             //handle cut out node
             if(free_element) list->element_free(&list_node->element);
+            list->head = NULL;
         }
     }
     free(list_node);
