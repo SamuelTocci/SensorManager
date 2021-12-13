@@ -24,28 +24,33 @@ DBCONN *init_connection(char clear_up_flag){
 	sqlite3 *conn;
 	char *err_msg = 0;
 	char *query;
-	int rc = sqlite3_open(TO_STRING(DB_NAME), &conn);
-	if (rc != SQLITE_OK){
+
+	/* Establish connection to db */
+	int result = sqlite3_open(TO_STRING(DB_NAME), &conn);
+	if (result != SQLITE_OK){
 		const char * send_buf = sqlite3_errmsg(conn);
 		write_to_fifo(send_buf);
 		
 		sqlite3_close(conn);
 		free(query);
 		return NULL;
+	} else {
+		const char * send_buf = "Connected to DataBase";
+		write_to_fifo(send_buf);
 	}
+	/* Creating (and clearing) Table */
 	if(clear_up_flag == 1){
 		asprintf(&query, "DROP TABLE IF EXISTS %1$s;"
 						"CREATE TABLE %1$s(Id Integer PRIMARY KEY AUTOINCREMENT, sensor_id Integer, sensor_value DECIMAL(4,2), timestamp TIMESTAMP);", TO_STRING(TABLE_NAME));
 	} else {
 		asprintf(&query,"CREATE TABLE %1$s(Id Integer PRIMARY KEY AUTOINCREMENT, sensor_id Integer, sensor_value DECIMAL(4,2), timestamp TIMESTAMP);", TO_STRING(TABLE_NAME));
 	}
-
-	int result = sqlite3_exec(conn, query, 0,0, &err_msg);
-	if(result == SQLITE_OK){
-		const char * send_buf = "Succesfully created Table";
+	result = sqlite3_exec(conn, query, 0,0, &err_msg);
+	if(result != SQLITE_OK){
+		const char * send_buf = sqlite3_errmsg(conn);
 		write_to_fifo(send_buf);
 	} else {
-		const char * send_buf = sqlite3_errmsg(conn);
+		const char * send_buf = "Created Table";
 		write_to_fifo(send_buf);
 	}
 	free(query);
@@ -54,6 +59,8 @@ DBCONN *init_connection(char clear_up_flag){
 
 void disconnect(DBCONN *conn){
 	sqlite3_close(conn);
+	const char * send_buf = "Disconnected DataBase";
+	write_to_fifo(send_buf);
 }
 
 int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_t ts){
@@ -65,8 +72,12 @@ int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_
 	int result = sqlite3_exec(conn, query, 0,0, &err_msg);
 	free(query);
 	if (result != SQLITE_OK){
-		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+		const char * send_buf = sqlite3_errmsg(conn);
+		write_to_fifo(send_buf);
 		return 1;
+	} else {
+		const char * send_buf = "Inserted Sensor";
+		write_to_fifo(send_buf);
 	}
 	return 0;
 }
@@ -81,8 +92,12 @@ int find_sensor_all(DBCONN *conn, callback_t f){
 	int result = sqlite3_exec(conn, query, f,0, &err_msg);
 	free(query);
 	if (result != SQLITE_OK){
-		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+		const char * send_buf = sqlite3_errmsg(conn);
+		write_to_fifo(send_buf);
 		return 1;
+	} else {
+		const char * send_buf = "Succesfull Query: Find All";
+		write_to_fifo(send_buf);
 	}
 	return 0;
 }
@@ -95,8 +110,12 @@ int find_sensor_by_value(DBCONN *conn, sensor_value_t value, callback_t f){
 	int result = sqlite3_exec(conn, query, f,0, &err_msg);
 	free(query);
 	if (result != SQLITE_OK){
-		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+		const char * send_buf = sqlite3_errmsg(conn);
+		write_to_fifo(send_buf);
 		return 1;
+	} else {
+		const char * send_buf = "Succesfull Query: Find by Value";
+		write_to_fifo(send_buf);	
 	}
 	return 0;
 }
@@ -109,8 +128,12 @@ int find_sensor_exceed_value(DBCONN *conn, sensor_value_t value, callback_t f){
 	int result = sqlite3_exec(conn, query, f,0, &err_msg);
 	free(query);
 	if (result != SQLITE_OK){
-		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+		const char * send_buf = sqlite3_errmsg(conn);
+		write_to_fifo(send_buf);
 		return 1;
+	} else {
+		const char * send_buf = "Succesfull Query: Find by min Value";
+		write_to_fifo(send_buf);
 	}
 	return 0;
 }
@@ -123,8 +146,12 @@ int find_sensor_by_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f){
 	int result = sqlite3_exec(conn, query, f,0, &err_msg);
 	free(query);
 	if (result != SQLITE_OK){
-		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+		const char * send_buf = sqlite3_errmsg(conn);
+		write_to_fifo(send_buf);
 		return 1;
+	} else {
+		const char * send_buf = "Succesfull Query: Find by ts";
+		write_to_fifo(send_buf);
 	}
 	return 0;
 }
@@ -137,8 +164,12 @@ int find_sensor_after_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f){
 	int result = sqlite3_exec(conn, query, f,0, &err_msg);
 	free(query);
 	if (result != SQLITE_OK){
-		fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
+		const char * send_buf = sqlite3_errmsg(conn);
+		write_to_fifo(send_buf);
 		return 1;
+	} else {
+		const char * send_buf = "Succesfull Query: Find by min ts";
+		write_to_fifo(send_buf);
 	}
 	return 0;
 }
@@ -152,7 +183,7 @@ void write_to_fifo(const char * send_buf){
 	CHECK_MKFIFO(result); 
 
 	fptr = fopen(FIFO_NAME, "w"); 
-	printf("syncing with reader ok\n");
+	//printf("syncing with reader ok\n");
 	FILE_OPEN_ERROR(fptr);
 
 	if ( fputs( send_buf, fptr ) == EOF )
@@ -161,8 +192,7 @@ void write_to_fifo(const char * send_buf){
 		exit( EXIT_FAILURE );
 	} 
 	FFLUSH_ERROR(fflush(fptr));
-	printf("Message send: %s \n", send_buf); 
-	sleep(1);
+	//printf("Message send: %s \n", send_buf); 
 
 	result = fclose( fptr );
 	FILE_CLOSE_ERROR(result);
@@ -178,7 +208,7 @@ void read_from_fifo(){
 	CHECK_MKFIFO(result); 
 	
 	fptr = fopen(FIFO_NAME, "r"); 
-	printf("syncing with writer ok\n");
+	//printf("syncing with writer ok\n");
 	FILE_OPEN_ERROR(fptr);
 
 	do 
@@ -186,7 +216,7 @@ void read_from_fifo(){
 		str_result = fgets(recv_buf, MAXBUFF, fptr);
 		if ( str_result != NULL )
 		{ 
-			printf("LOG: %s \n", recv_buf); 
+			printf("LOG: %s \n", recv_buf); //TODO: make it write to gateway.log
 		}
 	} while ( str_result != NULL ); 
 

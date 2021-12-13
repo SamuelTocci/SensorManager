@@ -35,13 +35,16 @@ START_TEST(test_fifo)
 {
     int pid = fork();
 	if(pid == 0){//child process, log mngr
-		read_from_fifo();
+        do{
+            read_from_fifo();
+        } while (1);
 		exit(EXIT_SUCCESS);
 		
 	} else { //parent process
-		DBCONN *result = init_connection(0);
-        // int check = insert_sensor(result, 5, 188, 27758);
-        sqlite3_close(result);
+		DBCONN *result = init_connection(1);
+        int check = insert_sensor(result, 5, 188, 27758);
+        check = insert_sensor(result, 17, 18.62, 27758);
+        disconnect(result);
         ck_assert_msg(result != NULL, "Error: expected result to to be 0");
         exit(EXIT_SUCCESS);
     }
