@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <assert.h>
+#include <unistd.h>
 
 void setup(void) {}
 
@@ -30,12 +31,21 @@ START_TEST(test_insert_sensor)
 }
 END_TEST
 
-START_TEST(test_pipe)
+START_TEST(test_fifo)
 {
-    DBCONN *result = init_connection(0);
-    
-    int check = insert_sensor(result, 5, 188, 27758);
-    ck_assert_msg(check == 0, "Error: expected result to to be 0");
+    int pid = fork();
+	if(pid == 0){//child process, log mngr
+		read_from_fifo();
+		exit(EXIT_SUCCESS);
+		
+	} else { //parent process
+		DBCONN *result = init_connection(0);
+        // int check = insert_sensor(result, 5, 188, 27758);
+        sqlite3_close(result);
+        ck_assert_msg(result != NULL, "Error: expected result to to be 0");
+        exit(EXIT_SUCCESS);
+    }
+
 
 }
 END_TEST
@@ -49,9 +59,9 @@ int main(void){
 
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
-    tcase_add_test(tc1_1, test_init_connect);
-    tcase_add_test(tc1_1, test_insert_sensor);
-    // tcase_add_test(tc1_1, test_pipe);
+    // tcase_add_test(tc1_1, test_init_connect);
+    // tcase_add_test(tc1_1, test_insert_sensor);
+    tcase_add_test(tc1_1, test_fifo);
 
     // Add other tests here...
 
@@ -63,12 +73,3 @@ int main(void){
 
 
 }
-
-// int print_row(void* arg1,int num_columns, char * column_value, char* column_name){
-//     int i;
-//     for(i =1;i< num_columns; i++){
-//         printf("[%d=%p]\t",column_name[i],column_value[i] ? column_value[i] : NULL);
-//     }
-//     printf("\n");
-//     return 0;
-// }
