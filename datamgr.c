@@ -45,14 +45,19 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data){
                 sensor_value_t avg = datamgr_get_avg(element->sensor_id);
                 if (avg <  SET_MIN_TEMP){ 
                     fprintf(stderr,"under min: %f\n", avg);
+                    // for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
+                    //     printf("value %i: %f \n", j, element->run_value[j]);
+                    // }
                 }
                 if (avg > SET_MAX_TEMP){ 
                     fprintf(stderr,"over max: %f\n",avg);
+                    // for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
+                    //     printf("value %i: %f \n", j, element->run_value[j]);
+                    // }
                 }
                 for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
                     element->run_value[j] = 0;
                 }
-                element->run_value[0] = sensor_data.value; 
             }
             if(element->run_value[i] == 0){ 
                 element->run_value[i] = sensor_data.value;
