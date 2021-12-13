@@ -50,7 +50,7 @@ int main(void){
     suite_add_tcase(s1, tc1_1);
     tcase_add_checked_fixture(tc1_1, setup, teardown);
     tcase_add_test(tc1_1, test_init_connect);
-    // tcase_add_test(tc1_1, test_insert_sensor);
+    tcase_add_test(tc1_1, test_insert_sensor);
     // tcase_add_test(tc1_1, test_pipe);
 
     // Add other tests here...

@@ -13,7 +13,13 @@
 #include <sqlite3.h>
 #include "sensor_db.h"
 #include <unistd.h>
+#include "errmacros.h"
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
+#define FIFO_NAME "LOGFIFO"
+#define MAXBUFF 80
 
 typedef int (*callback_t)(void *, int, char **, char **);
 
@@ -23,37 +29,58 @@ DBCONN *init_connection(char clear_up_flag){
 	char *query;
 	FILE *fptr;
 
-	
-	int pipefd[2], bytes_amount;
-	char buff[16];
-	if(pipe(pipefd) < 0){
-		exit(EXIT_FAILURE);
-	}
-
 	int pid = fork();
-	if(pid == 0){//child process
-		close(pipefd[1]); //close unused write end of pipe
-		//fptr = fopen("./log.txt","w");
-		printf("buff: %s\n", buff);
-		//fwrite(buff, sizeof(buff), 1, fptr);
-		while ((bytes_amount = read(pipefd[0], buff, 1)) > 0){
-			//log_mgr(buff);
-			printf("%s\0",buff);
-			//fwrite(buff, sizeof(buff), 1, fptr);
-		}
-		close(pipefd[0]);
-		printf("child\n");
-		_exit(EXIT_SUCCESS);
+	if(pid == 0){//child process, log mngr
+		int result;
+		char *str_result;
+  		char recv_buf[MAXBUFF]; 
+		/* Create the FIFO if it does not exist */ 
+		result = mkfifo(FIFO_NAME, 0666);
+		CHECK_MKFIFO(result); 
 		
-	} else { //parent process
-		close(pipefd[0]); //close unused read end of pipe
+		fptr = fopen(FIFO_NAME, "r"); 
+		printf("syncing with writer ok\n");
+		FILE_OPEN_ERROR(fptr);
 
+		do 
+		{
+			str_result = fgets(recv_buf, MAXBUFF, fptr);
+			if ( str_result != NULL )
+			{ 
+				printf("Message received: %s \n", recv_buf); 
+			}
+		} while ( str_result != NULL ); 
+
+		
+		result = fclose( fptr );
+		FILE_CLOSE_ERROR(result);
+  
+		exit(EXIT_SUCCESS);
+		
+	} else { //parent process, sql connection
 		int rc = sqlite3_open(TO_STRING(DB_NAME), &conn);
 		if (rc != SQLITE_OK){
-			//fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(conn));
-			write(pipefd[1],sqlite3_errmsg(conn), sizeof(sqlite3_errmsg(conn)));
-			close(pipefd[1]);
-			wait(NULL);
+			const char * send_buf = sqlite3_errmsg(conn);
+			int result;
+
+			/* Create the FIFO if it does not exist */ 
+			result = mkfifo(FIFO_NAME, 0666);
+			CHECK_MKFIFO(result); 
+			fptr = fopen(FIFO_NAME, "w"); 
+			printf("syncing with reader ok\n");
+			FILE_OPEN_ERROR(fptr);
+
+			if ( fputs( send_buf, fptr ) == EOF )
+			{
+				fprintf( stderr, "Error writing data to fifo\n");
+				exit( EXIT_FAILURE );
+			} 
+			FFLUSH_ERROR(fflush(fptr));
+			printf("Message send: %s", send_buf); 
+			sleep(1);
+
+			result = fclose( fptr );
+			FILE_CLOSE_ERROR(result);
 			sqlite3_close(conn);
 			free(query);
 			return NULL;
@@ -64,15 +91,22 @@ DBCONN *init_connection(char clear_up_flag){
 			sqlite3_exec(conn, query, 0,0, &err_msg);
 			free(query);
 		}
+		
+		// while ( i-- )
+		// {
+		// 	asprintf( &send_buf, "Test message %d\n", LOOPS-i );
+		// 	if ( fputs( send_buf, fp ) == EOF )
+		// 	{
+		// 	fprintf( stderr, "Error writing data to fifo\n");
+		// 	exit( EXIT_FAILURE );
+		// 	} 
+		// 	FFLUSH_ERROR(fflush(fp));
+		// 	printf("Message send: %s", send_buf); 
+		// 	free( send_buf );
+		// 	sleep(1);
+		// } 
+
 		printf("parent\n");
-		// char * succes = "Database succesfully opened";
-		// write(pipefd[1], succes, sizeof(succes));
-		//err_msg = "amen";
-		//write(pipefd[1], err_msg, sizeof(err_msg)); //err_msg is null atm
-		char* msg1 = "hello, world #1";
-		write(pipefd[1],msg1,16);
-		close(pipefd[1]);
-		wait(NULL);
 		exit(EXIT_SUCCESS);
 	}
 	return conn;
@@ -169,8 +203,12 @@ int find_sensor_after_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f){
 	return 0;
 }
 
-void log_mgr(char * pipeReadEnd){
-	printf("Log: %s\n", pipeReadEnd);
+void write_to_fifo(){
+
+}
+
+void read_from_fifo(){
+
 }
 
 #endif /* _SENSOR_DB_H_ */
