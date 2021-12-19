@@ -61,7 +61,7 @@ void con_listen(){
     int conn_count = 0;
     printf("-[server]- started\n");
     do{
-        poll_result = poll_result = poll(poll_fds, conn_count +1,5);
+        poll_result = poll_result = poll(poll_fds, conn_count +1,5000);
         if(poll_result>0){
             printf("in poll\n");
             if(poll_fds[0].revents & POLLIN){
@@ -89,9 +89,9 @@ void con_listen(){
                 tcp_result = tcp_receive(curr_client, (void *) &data.value, &bytes);
                 // read timestamp
                 bytes = sizeof(data.ts);
-                tcp_result = tcp_receive(curr_client, (void *) data.ts, &bytes);
-                if ((tcp_result == TCP_NO_ERROR) ) {
-                    printf("sensor id = %i - temperature = %g - timestamp = %ld\n",
+                tcp_result = tcp_receive(curr_client, (void *) &data.ts, &bytes);
+                if ((tcp_result == TCP_NO_ERROR) && bytes) {
+                    printf("sensor id = %i - temperature = %g - timestamp = %li\n",
                     data.id, data.value, data.ts);
                 }
             }
