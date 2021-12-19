@@ -1,8 +1,9 @@
 #include "connmgr.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "config.h"
 
 int main(void){
-    con_listen();
+    connmgr_listen(PORT);
     return 0;
 }

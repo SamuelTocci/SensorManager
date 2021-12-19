@@ -5,4 +5,6 @@
 /**
  * polls all connections and puts data in file
 */
-void con_listen();
+void connmgr_listen(int port_number);
+
+void connmgr_free();
