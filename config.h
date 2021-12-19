@@ -28,12 +28,17 @@ typedef struct {
 
 typedef struct pollfd pollfd_t;
 
-typedef struct{
-    pollfd_t poll_fd;
-    tcpsock_t * socket;
-} poll_t;
+typedef struct tcpsock tcpsock_t;
 
-
-
+/**
+ * Structure for holding the TCP socket information
+ */
+struct tcpsock {
+    long cookie;        /**< if the socket is bound, cookie should be equal to MAGIC_COOKIE */
+    // remark: the use of magic cookies doesn't guarantee a 'bullet proof' test
+    int sd;             /**< socket descriptor */
+    char *ip_addr;      /**< socket IP address */
+    int port;           /**< socket port number */
+};
 
 #endif /* _CONFIG_H_ */

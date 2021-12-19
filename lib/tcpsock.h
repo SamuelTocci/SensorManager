@@ -119,7 +119,7 @@ int tcp_get_port(tcpsock_t *socket, int *port);
  * Return the socket descriptor of the 'socket'
  * If 'socket' is NULL or not yet bound, TCP_SOCKET_ERROR is returned
  * \param socket the socket to get the socket descriptor from
- * \param port a pointer to an int that can hold the socket descriptor
+ * \param sd a pointer to an int that can hold the socket descriptor
  * \return TCP_NO_ERROR if no error occurs during execution
  */
 int tcp_get_sd(tcpsock_t *socket, int *sd);
