@@ -61,21 +61,21 @@ void con_listen(){
     int conn_count = 0;
     printf("-[server]- started\n");
     do{
-        poll_result = poll_result = poll(poll_fds, conn_count +1,5000);
+        poll_result = poll(poll_fds, conn_count +1,5000);
         if(poll_result>0){
-            printf("in poll\n");
             if(poll_fds[0].revents & POLLIN){
                 tcp_wait_for_connection(tcp_server, &client);
-                conn_count++;
                 
                 poll_fds = (pollfd_t *) realloc(poll_fds, sizeof(pollfd_t)*(conn_count+1));
-                tcp_get_sd(client, &(poll_fds[conn_count].fd));
-                poll_fds[conn_count].events = POLLIN;
-                dpl_insert_at_index(sockets, client, -1, true);
+                tcp_get_sd(client, &(poll_fds[conn_count+1].fd));
+                poll_fds[conn_count+1].events = POLLIN;
+                dpl_insert_at_index(sockets, client, conn_count + 1, true);
+                conn_count++;
                 printf("-[server]- new socket connected\n");
             }
         }
         for (int i = 0; i < conn_count; i++){
+            printf("%i\n",i );
             if(poll_fds[i+1].revents & POLLIN){
                 sensor_data_t data;
                 tcpsock_t * curr_client = dpl_get_element_at_index(sockets, i);
