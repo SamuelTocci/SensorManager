@@ -27,9 +27,10 @@ FILE * file;
 dplist_t * sockets;
 
 
-void socket_free(void ** socket){
-    //TODO
-    free(*socket);
+void socket_free(void ** element){
+    tcp_close(&((tcp_dpl_t *) *element)->socket);
+    free(*element);
+    element = NULL;
 }
 
 void * socket_copy(void * element){
@@ -39,7 +40,7 @@ void * socket_copy(void * element){
     return copy;
 }
 
-int socket_compare(void * socket1, void * socket2){
+int socket_compare(void * el1, void * el2){
     return 0;
 }
 
@@ -57,6 +58,7 @@ void connmgr_listen(int port_nr){
     tcp_get_sd(tcp_server, &(poll_fds[0].fd));
     poll_fds[0].events = POLLIN;
     int poll_result, bytes, tcp_result;
+    sensor_ts_t time_diff;
     int conn_count = 0;
     printf("-[server]- started\n");
     do{
@@ -75,9 +77,10 @@ void connmgr_listen(int port_nr){
             }
         }
         for (int i = 0; i < conn_count; i++){
+            tcp_dpl_t * curr_client = dpl_get_element_at_index(sockets, i);
+
             if(poll_fds[i+1].revents & POLLIN){
                 sensor_data_t_packed data;
-                tcp_dpl_t * curr_client = dpl_get_element_at_index(sockets, i);
 
                 // read sensor ID
                 bytes = sizeof(data.id);
@@ -89,13 +92,23 @@ void connmgr_listen(int port_nr){
                 bytes = sizeof(data.ts);
                 tcp_result = tcp_receive(curr_client->socket, (void *) &data.ts, &bytes);
                 if ((tcp_result == TCP_NO_ERROR) && bytes) {
-                    // printf("sensor id = %i - temperature = %g - timestamp = %li\n",
-                    // data.id, data.value, data.ts);
+                    printf("sensor id = %i - temperature = %g - timestamp = %li\n",
+                    data.id, data.value, data.ts);
                     fwrite(&data, sizeof(sensor_data_t_packed),1,file);
+                    curr_client->last_active = (sensor_ts_t) time(NULL); //update last_active only if new data is read
                 }
             }
+            time_diff = time(NULL) - curr_client->last_active;
+            if(time_diff > TIMEOUT/1000){
+                int array_size = sizeof(poll_fds)/sizeof(poll_fds[0]);
+                for (int y = i; y < array_size -1; y++) poll_fds[y]= poll_fds[y+1]; //shift all items in poll_fds to remove hole
+                poll_fds = (pollfd_t *) realloc(poll_fds, sizeof(pollfd_t)*(conn_count)); //=conn_count +1 -1
+                dpl_remove_at_index(sockets,i,true);
+                printf("-[server]- socket disconnected\n");
+                conn_count--;
+            }
         }
-    }while(1);
+    }while(conn_count > 0);
     free(poll_fds);
 }
 
