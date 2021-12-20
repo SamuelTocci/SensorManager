@@ -6,6 +6,11 @@ seq:
 par:
 	gcc -g -o server -lpthread main.c connmgr.c lib/tcpsock.c lib/dplist.c
 	gcc -g -o client -lpthread sensor_node.c lib/tcpsock.c
+	./server
+
+cl:
+	./client 15 2 127.0.0.1 5678
+
 
 gdb:
 	gcc -g -o server -lpthread main.c connmgr.c lib/tcpsock.c lib/dplist.c

@@ -22,17 +22,20 @@
  * CONCLUSIE: poll gebruiken
 */
 
+/* global variables */
+FILE * file;
+dplist_t * sockets;
+
 
 void socket_free(void ** socket){
+    //TODO
     free(*socket);
 }
 
-void * socket_copy(void * socket){
-    tcpsock_t * copy = (tcpsock_t *) malloc(sizeof(tcpsock_t*));
-    copy->sd = ((tcpsock_t *)socket)->sd;
-    copy->cookie = ((tcpsock_t *)socket)->cookie;
-    copy->ip_addr = ((tcpsock_t *)socket)->ip_addr;
-    copy->port = ((tcpsock_t *)socket)->port;
+void * socket_copy(void * element){
+    tcp_dpl_t * copy = (tcp_dpl_t *) malloc(sizeof(tcp_dpl_t*));
+    copy->socket = ((tcp_dpl_t *)element)->socket;
+    copy->last_active = ((tcp_dpl_t*)element)->last_active;
     return copy;
 }
 
@@ -42,11 +45,11 @@ int socket_compare(void * socket1, void * socket2){
 
 
 void connmgr_listen(int port_nr){
-    FILE * file = fopen(OUTPUT_NAME, "w"); //write to output file -> to datastream in final_assignment
-    dplist_t * sockets;
+    file = fopen(OUTPUT_NAME, "w"); //write to output file -> to datastream in final_assignment
     sockets = dpl_create(socket_copy, socket_free, socket_compare);
 
-    tcpsock_t * tcp_server, * client;
+    tcpsock_t * tcp_server;
+    tcp_dpl_t * client = malloc(sizeof(tcp_dpl_t));
     pollfd_t * poll_fds = malloc(sizeof(pollfd_t));
     
     if (tcp_passive_open(&tcp_server, port_nr) != TCP_NO_ERROR) exit(EXIT_FAILURE);
@@ -57,14 +60,15 @@ void connmgr_listen(int port_nr){
     int conn_count = 0;
     printf("-[server]- started\n");
     do{
-        poll_result = poll(poll_fds, conn_count +1,5000);
+        poll_result = poll(poll_fds, conn_count +1,TIMEOUT);
         if(poll_result>0){
             if(poll_fds[0].revents & POLLIN){
-                tcp_wait_for_connection(tcp_server, &client);
+                tcp_wait_for_connection(tcp_server, &(client->socket));
                 
                 poll_fds = (pollfd_t *) realloc(poll_fds, sizeof(pollfd_t)*(conn_count+1));
-                tcp_get_sd(client, &(poll_fds[conn_count+1].fd));
+                tcp_get_sd(client->socket, &(poll_fds[conn_count+1].fd));
                 poll_fds[conn_count+1].events = POLLIN;
+                client->last_active = (sensor_ts_t) time(NULL);
                 dpl_insert_at_index(sockets, client, conn_count + 1, true);
                 conn_count++;
                 printf("-[server]- new socket connected\n");
@@ -73,18 +77,17 @@ void connmgr_listen(int port_nr){
         for (int i = 0; i < conn_count; i++){
             if(poll_fds[i+1].revents & POLLIN){
                 sensor_data_t_packed data;
-                tcpsock_t * curr_client = dpl_get_element_at_index(sockets, i);
+                tcp_dpl_t * curr_client = dpl_get_element_at_index(sockets, i);
 
-                //printf("-client- reading data\n");
                 // read sensor ID
                 bytes = sizeof(data.id);
-                tcp_result = tcp_receive(curr_client, (void *) &data.id, &bytes);
+                tcp_result = tcp_receive(curr_client->socket, (void *) &data.id, &bytes);
                 // read temperature
                 bytes = sizeof(data.value);
-                tcp_result = tcp_receive(curr_client, (void *) &data.value, &bytes);
+                tcp_result = tcp_receive(curr_client->socket, (void *) &data.value, &bytes);
                 // read timestamp
                 bytes = sizeof(data.ts);
-                tcp_result = tcp_receive(curr_client, (void *) &data.ts, &bytes);
+                tcp_result = tcp_receive(curr_client->socket, (void *) &data.ts, &bytes);
                 if ((tcp_result == TCP_NO_ERROR) && bytes) {
                     // printf("sensor id = %i - temperature = %g - timestamp = %li\n",
                     // data.id, data.value, data.ts);
@@ -93,4 +96,10 @@ void connmgr_listen(int port_nr){
             }
         }
     }while(1);
+    free(poll_fds);
+}
+
+void connmgr_free(){
+    fclose(file);
+    dpl_free(&sockets, true);
 }

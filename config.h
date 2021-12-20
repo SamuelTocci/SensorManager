@@ -18,6 +18,7 @@
 #include "lib/tcpsock.h"
 
 #define PORT 5678
+#define TIMEOUT 5000
 
 typedef uint16_t sensor_id_t;
 typedef double sensor_value_t;
@@ -36,9 +37,11 @@ typedef struct{
 }sensor_data_t_packed;
 
 
+
 typedef struct pollfd pollfd_t;
 
 typedef struct tcpsock tcpsock_t;
+
 
 /**
  * Structure for holding the TCP socket information
@@ -50,5 +53,10 @@ struct tcpsock {
     char *ip_addr;      /**< socket IP address */
     int port;           /**< socket port number */
 };
+
+typedef struct{
+    sensor_ts_t last_active;
+    tcpsock_t * socket;
+}tcp_dpl_t;
 
 #endif /* _CONFIG_H_ */
