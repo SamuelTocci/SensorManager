@@ -5,5 +5,6 @@
 
 int main(void){
     connmgr_listen(PORT);
+    connmgr_free();
     return 0;
 }
