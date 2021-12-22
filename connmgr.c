@@ -61,11 +61,12 @@ void connmgr_listen(int port_nr){
     sensor_ts_t time_diff;
     int conn_count = 0;
     printf("-[server]- started\n");
+    printf("size : %li\n",sizeof(tcpsock_t) );
     do{
         poll_result = poll(poll_fds, conn_count +1,TIMEOUT);
         if(poll_result>0){
             if(poll_fds[0].revents & POLLIN){
-                tcp_wait_for_connection(tcp_server, &(client->socket));
+                tcp_wait_for_connection(tcp_server, &(client->socket)); //48 bytes per connection lost, client + client->socket
                 
                 poll_fds = (pollfd_t *) realloc(poll_fds, sizeof(pollfd_t)*(conn_count+2));
                 tcp_get_sd(client->socket, &(poll_fds[conn_count+1].fd));
@@ -105,11 +106,11 @@ void connmgr_listen(int port_nr){
                 dpl_remove_at_index(sockets,i,true);
                 printf("-[server]- socket disconnected\n");
                 conn_count--;
-                //TODO: alleen bij sluiten van laatste socket functioneel
             }
         }
     }while(dpl_size(sockets)>0);
     free(poll_fds);
+    tcp_close(&client->socket);
     free(client);
     tcp_close(&tcp_server);
 }
