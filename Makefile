@@ -1,10 +1,12 @@
+SETVALUE= -DTIMEOUT=5000 
+
 # Create your own targets that compile the application
 seq:
 	gcc -g -o server -lpthread test_server.c lib/tcpsock.c
 	gcc -g -o client -lpthread sensor_node.c lib/tcpsock.c 
 
 par:
-	gcc -g -o server -lpthread main.c connmgr.c lib/tcpsock.c lib/dplist.c
+	gcc -g -o server -lpthread main.c connmgr.c lib/tcpsock.c lib/dplist.c $(SETVALUE)
 	gcc -g -o client -lpthread sensor_node.c lib/tcpsock.c
 	./server
 
@@ -13,12 +15,12 @@ cl:
 
 
 gdb:
-	gcc -g -o server -lpthread main.c connmgr.c lib/tcpsock.c lib/dplist.c
+	gcc -g -o server -lpthread main.c connmgr.c lib/tcpsock.c lib/dplist.c $(SETVALUE)
 	gcc -g -o client -lpthread sensor_node.c lib/tcpsock.c
 	CK_FORK=no gdb server
 
 val:
-	gcc -g -o server -lpthread main.c connmgr.c lib/tcpsock.c lib/dplist.c
+	gcc -g -o server -lpthread main.c connmgr.c lib/tcpsock.c lib/dplist.c $(SETVALUE)
 	gcc -g -o client -lpthread sensor_node.c lib/tcpsock.c
 	CK_FORK=no valgrind --leak-check=full ./server
 

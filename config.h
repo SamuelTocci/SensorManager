@@ -18,7 +18,9 @@
 #include "lib/tcpsock.h"
 
 #define PORT 5678
-#define TIMEOUT 5000
+
+#ifndef TIMEOUT
+#endif
 
 typedef uint16_t sensor_id_t;
 typedef double sensor_value_t;
