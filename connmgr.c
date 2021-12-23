@@ -28,7 +28,7 @@ dplist_t * sockets;
 
 
 void socket_free(void ** element){
-    //tcp_close(&((tcp_dpl_t *) *element)->socket);
+    tcp_close(&((tcp_dpl_t *) *element)->socket);
     free(*element);
     element = NULL;
 }
@@ -66,13 +66,13 @@ void connmgr_listen(int port_nr){
         poll_result = poll(poll_fds, conn_count +1,TIMEOUT);
         if(poll_result>0){
             if(poll_fds[0].revents & POLLIN){
-                tcp_wait_for_connection(tcp_server, &(client->socket)); //48 bytes per connection lost, client + client->socket
+                tcp_wait_for_connection(tcp_server, &(client->socket));
                 
                 poll_fds = (pollfd_t *) realloc(poll_fds, sizeof(pollfd_t)*(conn_count+2));
                 tcp_get_sd(client->socket, &(poll_fds[conn_count+1].fd));
                 poll_fds[conn_count+1].events = POLLIN;
                 client->last_active = (sensor_ts_t) time(NULL);
-                dpl_insert_at_index(sockets, client, conn_count, true);
+                dpl_insert_at_index(sockets, client, conn_count+1, true);
                 conn_count++;
                 printf("-[server]- new socket connected\n");
             }
@@ -100,17 +100,15 @@ void connmgr_listen(int port_nr){
             }
             time_diff = time(NULL) - curr_client->last_active;
             if(time_diff > TIMEOUT/1000){
-                int array_size = sizeof(poll_fds)/sizeof(poll_fds[0]);
-                for (int y = i +1; y < array_size -2; y++) poll_fds[y]= poll_fds[y+1]; //shift all items in poll_fds to remove hole
+                for (int y = i +1; y < conn_count -1; y++) poll_fds[y] = poll_fds[y+1]; //shift all items in poll_fds to remove hole
                 poll_fds = (pollfd_t *) realloc(poll_fds, sizeof(pollfd_t)*(conn_count)); //=conn_count +1 -1
                 dpl_remove_at_index(sockets,i,true);
                 printf("-[server]- socket disconnected\n");
                 conn_count--;
             }
         }
-    }while(dpl_size(sockets)>0);
+    }while(conn_count > 0);
     free(poll_fds);
-    tcp_close(&client->socket);
     free(client);
     tcp_close(&tcp_server);
 }
