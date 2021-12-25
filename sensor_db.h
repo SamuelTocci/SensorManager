@@ -98,8 +98,4 @@ int find_sensor_by_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f);
  */
 int find_sensor_after_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f);
 
-void write_to_fifo(const char * send_buf);
-
-void read_from_fifo();
-
 #endif /* _SENSOR_DB_H_ */

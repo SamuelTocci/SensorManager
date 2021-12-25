@@ -34,5 +34,14 @@ typedef struct {
     sensor_ts_t ts;         /** < sensor timestamp */
 } sensor_data_t;
 
+typedef struct{
+    sensor_id_t id __attribute__((packed));
+    sensor_value_t value __attribute__((packed));
+    sensor_ts_t ts __attribute__((packed));
+}sensor_data_t_packed;
+
+void write_to_fifo(const char * send_buf);
+void read_from_fifo();
+
 
 #endif /* _CONFIG_H_ */

@@ -32,7 +32,6 @@ DBCONN *init_connection(char clear_up_flag){
 		write_to_fifo(send_buf);
 		
 		sqlite3_close(conn);
-		free(query);
 		return NULL;
 	} else {
 		const char * send_buf = "Connected to DataBase";
@@ -82,7 +81,14 @@ int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_
 	return 0;
 }
 
-int insert_sensor_from_file(DBCONN *conn, FILE *sensor_data);//TODO
+int insert_sensor_from_file(DBCONN *conn, FILE *fp_sensor_data){
+	sensor_data_t_packed sensor_data;
+    while (fread(&sensor_data, sizeof(sensor_data_t_packed),1,fp_sensor_data)>0){
+		int result = insert_sensor(conn, sensor_data.id, sensor_data.value, sensor_data.ts);
+		if(result != 0)return result;
+	}
+	return 0;
+}
 
 int find_sensor_all(DBCONN *conn, callback_t f){
 	char *query;
