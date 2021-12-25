@@ -9,6 +9,10 @@
 #include <pthread.h>
 #include <semaphore.h>
 
+/** Using semaphore = 2 for amount of readings done -> when 0 delete node 
+ *  tail lock for writing process -> no readings possible during write/insertion into sbuffer
+ */
+
 /**
  * basic node for the buffer, these nodes are linked together to create the buffer
  */
@@ -16,7 +20,6 @@ typedef struct sbuffer_node {
     struct sbuffer_node *next;           /**< a pointer to the next node */
     sensor_data_t data;                  /**< a structure containing the data */
     sem_t reads_sem;                     /**< a semaphore to keep track of amount of reads done */
-    //mss mutex toevoegen om reads_sem niet op hetzelfde moment te overwriten
 } sbuffer_node_t;
 
 /**
@@ -25,7 +28,6 @@ typedef struct sbuffer_node {
 struct sbuffer {
     sbuffer_node_t *head;         /**< a pointer to the first node in the buffer */
     sbuffer_node_t *tail;         /**< a pointer to the last node in the buffer */
-    pthread_rwlock_t head_rwlock; /**< a rwLock for the head of the sbuffer */
     pthread_rwlock_t tail_rwlock; /**< a rwLock for the tail of the sbuffer */
 };
 
