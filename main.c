@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h> 
+#include <signal.h>
+#include <pthread.h>
 #include "sbuffer.h"
 #include "config.h"
 
@@ -22,6 +24,17 @@ int main (void){
 
     } else { //parent
         //insertion in sbuffer
+        sensor_data_t * testData;
+        testData->id = 15;
+        testData->value = 20;
+        do
+        {
+            testData->ts=time(NULL);
+            sbuffer_insert(testBuff, testData);
+        } while (1);
+        
+
+        kill(getpid(), SIGKILL);
     }
     
 

@@ -15,10 +15,12 @@ test:
 	@echo -e '*************************'
 	./$(EXE)
 
-valgrind :
+val:
+	mkdir -p build
+	gcc $(SOURCE) -o $(EXE) $(FLAGS)
 	CK_FORK=no valgrind --leak-check=full $(EXE)
 
-gdb :
+gdb:
 	mkdir -p build
 	gcc $(SOURCE) -o $(EXE) $(FLAGS)
 	CK_FORK=no gdb $(EXE)
