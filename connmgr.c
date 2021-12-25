@@ -13,6 +13,12 @@
 #include <sys/poll.h>
 #include <unistd.h>
 
+#define ALLOCFAILURE(al)    \
+    if(al == NULL){         \
+        free(al);          \
+        exit(EXIT_FAILURE); \
+    }
+
 /**
  * SELECT vs POLL vs EPOLL!
  * - select gaat door lijst van fileds 1,2,...,200 tot hij connectie vind (niet performant, O(fd_id)) 
@@ -51,24 +57,27 @@ void connmgr_listen(int port_nr){
 
     tcpsock_t * tcp_server;
     tcp_dpl_t * client = malloc(sizeof(tcp_dpl_t));
+    ALLOCFAILURE(client);
     pollfd_t * poll_fds = malloc(sizeof(pollfd_t));
+    ALLOCFAILURE(poll_fds);
     
     if (tcp_passive_open(&tcp_server, port_nr) != TCP_NO_ERROR) exit(EXIT_FAILURE);
 
     tcp_get_sd(tcp_server, &(poll_fds[0].fd));
     poll_fds[0].events = POLLIN;
-    int poll_result, bytes, tcp_result;
     sensor_ts_t time_diff;
     int conn_count = 0;
     printf("-[server]- started\n");
     printf("size : %li\n",sizeof(tcpsock_t) );
     do{
-        poll_result = poll(poll_fds, conn_count +1,TIMEOUT);
+        int poll_result;
+        poll_result = poll(poll_fds, conn_count +1,TIMEOUT*1000);
         if(poll_result>0){
             if(poll_fds[0].revents & POLLIN){
                 tcp_wait_for_connection(tcp_server, &(client->socket));
                 
                 poll_fds = (pollfd_t *) realloc(poll_fds, sizeof(pollfd_t)*(conn_count+2));
+                ALLOCFAILURE(poll_fds);
                 tcp_get_sd(client->socket, &(poll_fds[conn_count+1].fd));
                 poll_fds[conn_count+1].events = POLLIN;
                 client->last_active = (sensor_ts_t) time(NULL);
@@ -81,6 +90,7 @@ void connmgr_listen(int port_nr){
             tcp_dpl_t * curr_client = dpl_get_element_at_index(sockets, i);
             if(poll_fds[i+1].revents & POLLIN){
                 sensor_data_t_packed data;
+                int bytes, tcp_result;
 
                 // read sensor ID
                 bytes = sizeof(data.id);
@@ -99,9 +109,10 @@ void connmgr_listen(int port_nr){
                 }
             }
             time_diff = time(NULL) - curr_client->last_active;
-            if(time_diff > TIMEOUT/1000){
+            if(time_diff > TIMEOUT){
                 for (int y = i +1; y < conn_count -1; y++) poll_fds[y] = poll_fds[y+1]; //shift all items in poll_fds to remove hole
                 poll_fds = (pollfd_t *) realloc(poll_fds, sizeof(pollfd_t)*(conn_count)); //=conn_count +1 -1
+                ALLOCFAILURE(poll_fds);
                 dpl_remove_at_index(sockets,i,true);
                 printf("-[server]- socket disconnected\n");
                 conn_count--;
