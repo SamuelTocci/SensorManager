@@ -36,7 +36,7 @@ dplist_t * sockets;
 void socket_free(void ** element){
     tcp_close(&((tcp_dpl_t *) *element)->socket);
     free(*element);
-    element = NULL;
+    *element = NULL;
 }
 
 void * socket_copy(void * element){
@@ -94,13 +94,13 @@ void connmgr_listen(int port_nr){
 
                 // read sensor ID
                 bytes = sizeof(data.id);
-                tcp_result = tcp_receive(curr_client->socket, (void *) &data.id, &bytes);
+                tcp_result += tcp_receive(curr_client->socket, (void *) &data.id, &bytes);
                 // read temperature
                 bytes = sizeof(data.value);
-                tcp_result = tcp_receive(curr_client->socket, (void *) &data.value, &bytes);
+                tcp_result += tcp_receive(curr_client->socket, (void *) &data.value, &bytes);
                 // read timestamp
                 bytes = sizeof(data.ts);
-                tcp_result = tcp_receive(curr_client->socket, (void *) &data.ts, &bytes);
+                tcp_result += tcp_receive(curr_client->socket, (void *) &data.ts, &bytes);
                 if ((tcp_result == TCP_NO_ERROR) && bytes) {
                     printf("sensor id = %i - temperature = %g - timestamp = %li\n",
                     data.id, data.value, data.ts);
