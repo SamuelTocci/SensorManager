@@ -24,7 +24,7 @@ file_creator : file_creator.c
 
 sensor_node : sensor_node.c lib/libtcpsock.so
 	@echo "$(TITLE_COLOR)\n***** COMPILING sensor_node *****$(NO_COLOR)"
-	gcc -c sensor_node.c -Wall -std=c11 -Werror -o sensor_node.o -fdiagnostics-color=auto
+	gcc -c sensor_node.c -Wall -Werror -o sensor_node.o -fdiagnostics-color=auto
 	@echo "$(TITLE_COLOR)\n***** LINKING sensor_node *****$(NO_COLOR)"
 	gcc sensor_node.o -ltcpsock -o sensor_node -Wall -L./lib -Wl,-rpath=./lib -fdiagnostics-color=auto
 
