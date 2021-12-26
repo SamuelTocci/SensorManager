@@ -12,6 +12,7 @@
 #include <inttypes.h>
 #include <sys/poll.h>
 #include <unistd.h>
+#include "sbuffer.h"
 
 #define ALLOCFAILURE(al)    \
     if(al == NULL){         \
@@ -51,7 +52,7 @@ int socket_compare(void * el1, void * el2){
 }
 
 
-void connmgr_listen(int port_nr){
+void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
     file = fopen(OUTPUT_NAME, "w"); //write to output file -> to datastream in final_assignment
     sockets = dpl_create(socket_copy, socket_free, socket_compare);
 
@@ -89,22 +90,23 @@ void connmgr_listen(int port_nr){
         for (int i = 0; i < conn_count; i++){
             tcp_dpl_t * curr_client = dpl_get_element_at_index(sockets, i);
             if(poll_fds[i+1].revents & POLLIN){
-                sensor_data_t_packed data;
-                int bytes, tcp_result;
+                sensor_data_t_packed * data = malloc(sizeof(sensor_data_t_packed*));
+                int bytes, tcp_result = 0;
 
                 // read sensor ID
-                bytes = sizeof(data.id);
-                tcp_result += tcp_receive(curr_client->socket, (void *) &data.id, &bytes);
+                bytes = sizeof(data->id);
+                tcp_result += tcp_receive(curr_client->socket, (void *) &data->id, &bytes);
                 // read temperature
-                bytes = sizeof(data.value);
-                tcp_result += tcp_receive(curr_client->socket, (void *) &data.value, &bytes);
+                bytes = sizeof(data->value);
+                tcp_result += tcp_receive(curr_client->socket, (void *) &data->value, &bytes);
                 // read timestamp
-                bytes = sizeof(data.ts);
-                tcp_result += tcp_receive(curr_client->socket, (void *) &data.ts, &bytes);
+                bytes = sizeof(data->ts);
+                tcp_result += tcp_receive(curr_client->socket, (void *) &data->ts, &bytes);
                 if ((tcp_result == TCP_NO_ERROR) && bytes) {
-                    printf("sensor id = %i - temperature = %g - timestamp = %li\n",
-                    data.id, data.value, data.ts);
-                    fwrite(&data, sizeof(sensor_data_t_packed),1,file);
+                    // printf("sensor id = %i - temperature = %g - timestamp = %li\n",
+                    // data->id, data->value, data->ts);
+                    // fwrite(&data, sizeof(sensor_data_t_packed),1,file);
+                    sbuffer_insert(sbuffer, data);
                     curr_client->last_active = (sensor_ts_t) time(NULL); //update last_active only if new data is read
                 }
             }

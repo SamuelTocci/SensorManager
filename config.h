@@ -33,8 +33,6 @@
 #define OUTPUT_NAME "sensor_data_recv"
 #endif
 
-#define PORT 5678
-
 #ifndef TIMEOUT
 #endif
 

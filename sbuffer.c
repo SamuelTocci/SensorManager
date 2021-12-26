@@ -6,19 +6,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "sbuffer.h"
-#include <pthread.h>
 #include <semaphore.h>
-
-/** Using semaphore = 2 for amount of readings done -> when 0 delete node 
- *  tail lock for writing process -> no readings possible during write/insertion into sbuffer
- */
+#include <pthread.h>
 
 /**
  * basic node for the buffer, these nodes are linked together to create the buffer
  */
 typedef struct sbuffer_node {
     struct sbuffer_node *next;           /**< a pointer to the next node */
-    sensor_data_t data;                  /**< a structure containing the data */
+    sensor_data_t_packed data;                  /**< a structure containing the data */
     sem_t reads_sem;                     /**< a semaphore to keep track of amount of reads done */
 } sbuffer_node_t;
 
@@ -30,6 +26,10 @@ struct sbuffer {
     sbuffer_node_t *tail;         /**< a pointer to the last node in the buffer */
     pthread_rwlock_t tail_rwlock; /**< a rwLock for the tail of the sbuffer */
 };
+
+/** Using semaphore = 2 for amount of readings done -> when 0 delete node 
+ *  tail lock for writing process -> no readings possible during write/insertion into sbuffer
+ */
 
 int sbuffer_init(sbuffer_t **buffer) { //thread safety not needed, only used when starting program
     *buffer = malloc(sizeof(sbuffer_t));
@@ -54,7 +54,7 @@ int sbuffer_free(sbuffer_t **buffer) { //thread safety not needed, only used whe
     return SBUFFER_SUCCESS;
 }
 
-int sbuffer_remove(sbuffer_t *buffer, sensor_data_t *data) {
+int sbuffer_remove(sbuffer_t *buffer, sensor_data_t_packed *data) {
     sbuffer_node_t *dummy;
     if (buffer == NULL) return SBUFFER_FAILURE;
     if (buffer->head == NULL) return SBUFFER_NO_DATA;
@@ -71,7 +71,7 @@ int sbuffer_remove(sbuffer_t *buffer, sensor_data_t *data) {
     return SBUFFER_SUCCESS;
 }
 
-int sbuffer_insert(sbuffer_t *buffer, sensor_data_t *data) { //reads_sem init() at end of insertion
+int sbuffer_insert(sbuffer_t *buffer, sensor_data_t_packed *data) { //reads_sem init() at end of insertion
     sbuffer_node_t *dummy;
     if (buffer == NULL) return SBUFFER_FAILURE;
     dummy = malloc(sizeof(sbuffer_node_t));
