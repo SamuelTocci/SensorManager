@@ -90,7 +90,7 @@ void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
         for (int i = 0; i < conn_count; i++){
             tcp_dpl_t * curr_client = dpl_get_element_at_index(sockets, i);
             if(poll_fds[i+1].revents & POLLIN){
-                sensor_data_t_packed * data = malloc(sizeof(sensor_data_t_packed*));
+                sensor_data_t_packed * data = malloc(sizeof(sensor_data_t_packed));
                 int bytes, tcp_result = 0;
 
                 // read sensor ID

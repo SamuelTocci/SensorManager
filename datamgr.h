@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include "config.h"
 #include "stdint.h"
+#include "sbuffer.h"
 
 #ifndef RUN_AVG_LENGTH
 #define RUN_AVG_LENGTH 5
@@ -56,7 +57,7 @@ typedef struct{
  * 132 24 1636982296
  * 142 25 1636982296
  */
-void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data);
+void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer);
 
 /**
  * This method should be called to clean up the datamgr, and to free all used memory. 

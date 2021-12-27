@@ -91,10 +91,9 @@ void dpl_free(dplist_t **list, bool free_element) {
 }
 
 dplist_t *dpl_insert_at_index(dplist_t *list, void *element, int index, bool insert_copy) {
-
     dplist_node_t *ref_at_index, *list_node;
     if (list == NULL) return NULL;
-
+    
     list_node = malloc(sizeof(dplist_node_t));
     DPLIST_ERR_HANDLER(list_node == NULL, DPLIST_MEMORY_ERROR);
     if (insert_copy){

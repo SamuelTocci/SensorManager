@@ -24,7 +24,7 @@ typedef struct sbuffer_node {
 struct sbuffer {
     sbuffer_node_t *head;         /**< a pointer to the first node in the buffer */
     sbuffer_node_t *tail;         /**< a pointer to the last node in the buffer */
-    pthread_rwlock_t tail_rwlock; /**< a rwLock for the tail of the sbuffer */
+    pthread_rwlock_t * tail_rwlock; /**< a rwLock for the tail of the sbuffer */
 };
 
 /** Using semaphore = 2 for amount of readings done -> when 0 delete node 
@@ -36,6 +36,11 @@ int sbuffer_init(sbuffer_t **buffer) { //thread safety not needed, only used whe
     if (*buffer == NULL) return SBUFFER_FAILURE;
     (*buffer)->head = NULL;
     (*buffer)->tail = NULL;
+    (*buffer)->tail_rwlock = malloc(sizeof(pthread_rwlock_t));
+    pthread_rwlockattr_t * attr = malloc(sizeof(pthread_rwlockattr_t));
+    pthread_rwlockattr_init(attr);
+    pthread_rwlockattr_setpshared(attr, PTHREAD_PROCESS_SHARED);
+    pthread_rwlock_init((*buffer)->tail_rwlock, attr);
     return SBUFFER_SUCCESS;
 }
 
@@ -89,6 +94,15 @@ int sbuffer_insert(sbuffer_t *buffer, sensor_data_t_packed *data) { //reads_sem 
     int semSucces = sem_init(&dummy->reads_sem,1,2); // __pshared = 1 : allow semaphore to be used by read&write process
     if(semSucces != 0) return SBUFFER_FAILURE;
     return SBUFFER_SUCCESS;
+}
+
+sensor_data_t_packed * sbuffer_head(sbuffer_t * sbuffer){
+    if(sbuffer->head != NULL){
+        sensor_data_t_packed * head_data = malloc(sizeof(sensor_data_t_packed*));
+        *head_data = (sbuffer->head)->data;
+        return head_data;
+    }
+    return NULL;
 }
 
 // TODO: make program threadsafe

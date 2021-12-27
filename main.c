@@ -14,7 +14,12 @@ void connmgr_routine(void * port_number){
 }
 
 void datamgr_routine(){
+    FILE * map = fopen("room_sensor.map", "r");
 
+    do{
+        datamgr_parse_sensor_files(map, sbuffer);
+    } while (1);
+    
 }
 
 void db_routine(){
@@ -31,15 +36,16 @@ int main(int argc, char const *argv[]){
         } while (1);
 		
 	} else { //parent process, main
+
         pthread_t * connmgr_pthread = malloc(sizeof(pthread_t));
         pthread_create(connmgr_pthread, NULL,(void *) &connmgr_routine, (void *) argv[1]);
-        pthread_t * datamgr_pthread = malloc(sizeof(pthread_t));
-        pthread_create(datamgr_pthread, NULL,(void *) &datamgr_routine, (void *) argv[1]);
+        // pthread_t * datamgr_pthread = malloc(sizeof(pthread_t));
+        // pthread_create(datamgr_pthread, NULL,(void *) &datamgr_routine, NULL);
         pthread_t * db_pthread = malloc(sizeof(pthread_t));
-        pthread_create(db_pthread, NULL,(void *) &db_routine, (void *) argv[1]);
+        pthread_create(db_pthread, NULL,(void *) &db_routine, NULL);
 
         pthread_join(*connmgr_pthread, NULL);
-        pthread_join(*datamgr_pthread, NULL);
+        // pthread_join(*datamgr_pthread, NULL);
         pthread_join(*db_pthread, NULL);
     }
     

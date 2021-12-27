@@ -9,18 +9,17 @@
 #include "datamgr.h"
 #include "config.h"
 #include "lib/dplist.h"
+#include "sbuffer.h"
 
 void * element_copy(void * element){
-    // sensor_data_t* copy = malloc(sizeof (sensor_data_t));
-    // sensor_id_t new_id;
-    // asprintf(&new_id,"%s",((sensor_data_t*)element)->id);
-    // assert(copy != NULL);
-    // copy->id = ((sensor_data_t*)element)->id;
-    // copy->id = new_id;
-    // return (void *) copy;
-    void * a = NULL;
-    return a;
-    //TODO: code aanpassen naar sensor_data_t struct
+    sensor_t* copy = malloc(sizeof (sensor_t));
+    copy->room_id = ((sensor_t*)element)->room_id;
+    copy->sensor_id = ((sensor_t*)element)->sensor_id;
+    copy->ts = ((sensor_t*)element)->ts;
+    for (int index = 0; index < RUN_AVG_LENGTH; index++){
+        copy->run_value[index] = ((sensor_t*)element)->run_value[index];
+    }
+    return copy;
 }
 
 void element_free(void ** element){
@@ -35,55 +34,51 @@ int element_compare(void * x, void * y){
 
 dplist_t * sensor_list;
 
-void datamgr_parse_sensor_files(FILE *fp_sensor_map, FILE *fp_sensor_data){
+void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
     room_id_t curr_room;
     sensor_id_t curr_sensor;
     //TODO: add catch if files are not opened correctly
     sensor_list = dpl_create(element_copy, element_free, element_compare);
     while (fscanf(fp_sensor_map, "%hd %hd", &curr_room, &curr_sensor)>0){
-        sensor_t * sensor;
-        sensor = malloc(sizeof(sensor_t));
+        sensor_t * sensor = malloc(sizeof(sensor_t));
         sensor->sensor_id = curr_sensor;
         sensor->room_id = curr_room;
         for (int i = 0; i < RUN_AVG_LENGTH ; i++){
             sensor->run_value[i] = 0;
         }
-        dpl_insert_at_index(sensor_list, sensor,-1,false); //initialize sensor in sensorlist
+        dpl_insert_at_index(sensor_list, sensor,-1,true); //initialize sensor in sensorlist
     }
 
-    sensor_data_t_packed sensor_data;
-    while (fread(&sensor_data, sizeof(sensor_data_t_packed),1,fp_sensor_data)>0){
-        //printf ("id = %d value = %f %ld\n", sensor_data.id, sensor_data.value, sensor_data.ts);
+    sensor_data_t_packed * sensor_data;
+    while ((sensor_data = sbuffer_head(sbuffer)) != NULL){
         sensor_data_t_packed *dummy_data = malloc(sizeof(sensor_data_t_packed));
-        dummy_data->id = sensor_data.id;
+        dummy_data->id = sensor_data->id;
 
         int index = dpl_get_index_of_element(sensor_list, dummy_data); //search element with same id in sensor_list
+        printf("%i\n",index );
         free(dummy_data);
-        sensor_t * element;// element staat al in heap door sensor map loop
+        sensor_t * element; // element staat al in heap door sensor map loop
         element = dpl_get_element_at_index(sensor_list, index);
-        element->ts = sensor_data.ts;
+        if(element == NULL)printf("amen\n");
+        printf("amen before\n");
+        element->ts = sensor_data->ts;
+        printf("amen after\n");
 
         for (int i = 0; i < RUN_AVG_LENGTH; i++){ //find empty spot in run_value[]
             if(element->run_value[RUN_AVG_LENGTH-1] != 0){
                 sensor_value_t avg = datamgr_get_avg(element->sensor_id);
                 if (avg <  SET_MIN_TEMP){ 
                     fprintf(stderr,"under min: %f\n", avg);
-                    // for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
-                    //     printf("value %i: %f \n", j, element->run_value[j]);
-                    // }
                 }
                 if (avg > SET_MAX_TEMP){ 
                     fprintf(stderr,"over max: %f\n",avg);
-                    // for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
-                    //     printf("value %i: %f \n", j, element->run_value[j]);
-                    // }
                 }
                 for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
                     element->run_value[j] = 0;
                 }
             }
             if(element->run_value[i] == 0){ 
-                element->run_value[i] = sensor_data.value;
+                element->run_value[i] = sensor_data->value;
                 break;
             }
         }

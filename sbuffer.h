@@ -44,4 +44,6 @@ int sbuffer_remove(sbuffer_t *buffer, sensor_data_t_packed *data);
 */
 int sbuffer_insert(sbuffer_t *buffer, sensor_data_t_packed *data);
 
+sensor_data_t_packed * sbuffer_head(sbuffer_t * sbuffer);
+
 #endif  //_SBUFFER_H_
