@@ -49,11 +49,11 @@ int sbuffer_init(sbuffer_t **buffer) { //thread safety not needed, only used whe
 }
 
 int sbuffer_free(sbuffer_t **buffer) { //thread safety not needed, only used when shutting down program
-    sbuffer_node_t *dummy;
     if ((buffer == NULL) || (*buffer == NULL)) {
         return SBUFFER_FAILURE;
     }
     while ((*buffer)->head) {
+        sbuffer_node_t *dummy;
         dummy = (*buffer)->head;
         (*buffer)->head = (*buffer)->head->next;
         free(dummy);

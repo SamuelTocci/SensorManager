@@ -17,6 +17,7 @@
 #define ALLOCFAILURE(al)    \
     if(al == NULL){         \
         free(al);          \
+        printf("alloc failure\n");\
         exit(EXIT_FAILURE); \
     }
 
@@ -30,7 +31,6 @@
 */
 
 /* global variables */
-FILE * file;
 dplist_t * sockets;
 
 
@@ -53,7 +53,6 @@ int socket_compare(void * el1, void * el2){
 
 
 void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
-    file = fopen(OUTPUT_NAME, "w"); //write to output file -> to datastream in final_assignment
     sockets = dpl_create(socket_copy, socket_free, socket_compare);
 
     tcpsock_t * tcp_server;
@@ -69,7 +68,6 @@ void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
     sensor_ts_t time_diff;
     int conn_count = 0;
     printf("-[server]- started\n");
-    printf("size : %li\n",sizeof(tcpsock_t) );
     do{
         int poll_result;
         poll_result = poll(poll_fds, conn_count +1,TIMEOUT*1000);
@@ -127,6 +125,5 @@ void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
 }
 
 void connmgr_free(){
-    fclose(file);
     dpl_free(&sockets, true);
 }

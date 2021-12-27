@@ -11,6 +11,7 @@ sbuffer_t * sbuffer;
 void connmgr_routine(void * port_number){
     printf("%i\n",atoi(port_number) );
     connmgr_listen(atoi(port_number), sbuffer);
+    printf("connmgr discconnect\n");
     connmgr_free();
 }
 
@@ -20,6 +21,7 @@ void datamgr_routine(){
     do{
         datamgr_parse_sensor_files(map, sbuffer);
     } while (1);
+    printf("data disconnect\n");
     
 }
 
@@ -29,6 +31,7 @@ void db_routine(){
         insert_sensor_from_file(sqlite, sbuffer);
     } while (1);
     disconnect(sqlite);
+    printf("db disconnect\n");
 }
 
 int main(int argc, char const *argv[]){
@@ -51,7 +54,7 @@ int main(int argc, char const *argv[]){
 
         pthread_join(*connmgr_pthread, NULL);
         // pthread_join(*datamgr_pthread, NULL);
-        pthread_join(*db_pthread, NULL);
+        // pthread_join(*db_pthread, NULL);
     }
     
 
