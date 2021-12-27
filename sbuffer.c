@@ -24,6 +24,8 @@ typedef struct sbuffer_node {
 struct sbuffer {
     sbuffer_node_t *head;         /**< a pointer to the first node in the buffer */
     sbuffer_node_t *tail;         /**< a pointer to the last node in the buffer */
+    sbuffer_node_t *storage_curr;      /**< a pointer to the node dbmngr is currently reading */
+    sbuffer_node_t *data_curr;      /**< a pointer to the node dbmngr is currently reading */
     pthread_rwlock_t * tail_rwlock; /**< a rwLock for the tail of the sbuffer */
 };
 
@@ -36,6 +38,8 @@ int sbuffer_init(sbuffer_t **buffer) { //thread safety not needed, only used whe
     if (*buffer == NULL) return SBUFFER_FAILURE;
     (*buffer)->head = NULL;
     (*buffer)->tail = NULL;
+    (*buffer)->storage_curr = NULL;
+    (*buffer)->data_curr = NULL;
     (*buffer)->tail_rwlock = malloc(sizeof(pthread_rwlock_t));
     pthread_rwlockattr_t * attr = malloc(sizeof(pthread_rwlockattr_t));
     pthread_rwlockattr_init(attr);
@@ -96,11 +100,24 @@ int sbuffer_insert(sbuffer_t *buffer, sensor_data_t_packed *data) { //reads_sem 
     return SBUFFER_SUCCESS;
 }
 
-sensor_data_t_packed * sbuffer_head(sbuffer_t * sbuffer){
-    if(sbuffer->head != NULL){
-        sensor_data_t_packed * head_data = malloc(sizeof(sensor_data_t_packed*));
-        *head_data = (sbuffer->head)->data;
-        return head_data;
+sensor_data_t_packed * sbuffer_next(sbuffer_t * sbuffer, char process){
+    if(sbuffer->head == NULL) return NULL;
+    switch (process){
+    case 0:
+        if(sbuffer->data_curr == NULL)sbuffer->data_curr = sbuffer->head;
+        if(sbuffer->data_curr->next != NULL)sbuffer->data_curr = sbuffer->data_curr->next;
+        else return NULL;
+        //semaphore decrease
+        return &sbuffer->data_curr->data;
+        break;
+
+    case 1:
+        if(sbuffer->storage_curr == NULL)sbuffer->storage_curr = sbuffer->head;
+        if(sbuffer->storage_curr->next != NULL)sbuffer->storage_curr = sbuffer->storage_curr->next;
+        else return NULL;
+        //semaphore decrease
+        return &sbuffer->storage_curr->data;
+        break;
     }
     return NULL;
 }

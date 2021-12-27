@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "config.h"
 #include <sqlite3.h>
+#include "sbuffer.h"
 
 // stringify preprocessor directives using 2-level preprocessor magic
 // this avoids using directives like -DDB_NAME=\"some_db_name\"
@@ -47,7 +48,7 @@ int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_
  * \param sensor_data a file pointer to binary file containing sensor data
  * \return zero for success, and non-zero if an error occurs
  */
-int insert_sensor_from_file(DBCONN *conn, FILE *sensor_data);
+int insert_sensor_from_file(DBCONN *conn, sbuffer_t * sbuffer);
 
 /**
   * Write a SELECT query to select all sensor measurements in the table 

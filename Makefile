@@ -58,7 +58,7 @@ run : sensor_gateway sensor_node
 	./sensor_gateway 5678
 
 gdb: sensor_gateway sensor_node
-	CK_FORK=no gdb ./sensor_gateway 5678
+	CK_FORK=no gdb --args ./sensor_gateway 5678
 
 nodes:
 	./sensor_node 15 2 127.0.0.1 5678 &	

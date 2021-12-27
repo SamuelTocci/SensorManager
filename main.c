@@ -9,6 +9,7 @@
 sbuffer_t * sbuffer;
 
 void connmgr_routine(void * port_number){
+    printf("%i\n",atoi(port_number) );
     connmgr_listen(atoi(port_number), sbuffer);
     connmgr_free();
 }
@@ -23,7 +24,11 @@ void datamgr_routine(){
 }
 
 void db_routine(){
-
+    DBCONN * sqlite = init_connection(1);
+    do{
+        insert_sensor_from_file(sqlite, sbuffer);
+    } while (1);
+    disconnect(sqlite);
 }
 
 int main(int argc, char const *argv[]){

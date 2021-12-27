@@ -50,7 +50,7 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
     }
 
     sensor_data_t_packed * sensor_data;
-    while ((sensor_data = sbuffer_head(sbuffer)) != NULL){
+    while ((sensor_data = sbuffer_next(sbuffer, 0)) != NULL){
         sensor_data_t_packed *dummy_data = malloc(sizeof(sensor_data_t_packed));
         dummy_data->id = sensor_data->id;
 
