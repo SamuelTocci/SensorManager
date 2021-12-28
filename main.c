@@ -22,16 +22,14 @@ void datamgr_routine(){
         datamgr_parse_sensor_files(map, sbuffer);
     } while (1);
     printf("data disconnect\n");
-    
 }
 
 void db_routine(){
     DBCONN * sqlite = init_connection(1);
-    do{
-        insert_sensor_from_file(sqlite, sbuffer);
-    } while (1);
+        
+    insert_sensor_from_file(sqlite, sbuffer);
+
     disconnect(sqlite);
-    printf("db disconnect\n");
 }
 
 int main(int argc, char const *argv[]){
@@ -54,7 +52,7 @@ int main(int argc, char const *argv[]){
 
         pthread_join(*connmgr_pthread, NULL);
         // pthread_join(*datamgr_pthread, NULL);
-        // pthread_join(*db_pthread, NULL);
+        pthread_join(*db_pthread, NULL);
     }
     
 
