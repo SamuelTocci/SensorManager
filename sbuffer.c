@@ -104,7 +104,10 @@ sensor_data_t_packed * sbuffer_next(sbuffer_t * sbuffer, char process){
     if(sbuffer->head == NULL) return NULL;
     switch (process){
     case 0:
-        if(sbuffer->data_curr == NULL)sbuffer->data_curr = sbuffer->head;
+        if(sbuffer->data_curr == NULL){
+            sbuffer->data_curr = sbuffer->head;
+            return &sbuffer->data_curr->data;
+            }
         if(sbuffer->data_curr->next != NULL)sbuffer->data_curr = sbuffer->data_curr->next;
         else return NULL;
         //semaphore decrease
@@ -112,7 +115,10 @@ sensor_data_t_packed * sbuffer_next(sbuffer_t * sbuffer, char process){
         break;
 
     case 1:
-        if(sbuffer->storage_curr == NULL)sbuffer->storage_curr = sbuffer->head;
+        if(sbuffer->storage_curr == NULL){
+            sbuffer->storage_curr = sbuffer->head;
+            return &sbuffer->storage_curr->data;
+            }
         if(sbuffer->storage_curr->next != NULL)sbuffer->storage_curr = sbuffer->storage_curr->next;
         else return NULL;
         //semaphore decrease
