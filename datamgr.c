@@ -50,39 +50,34 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
     }
 
     sensor_data_t_packed * sensor_data;
-    while ((sensor_data = sbuffer_next(sbuffer, 0)) != NULL){
-        sensor_data_t_packed *dummy_data = malloc(sizeof(sensor_data_t_packed));
-        dummy_data->id = sensor_data->id;
+    time_t latest = time(NULL);
+    do{
+        while ((sensor_data = sbuffer_next(sbuffer, 0)) != NULL){
 
-        int index = dpl_get_index_of_element(sensor_list, dummy_data); //search element with same id in sensor_list
-        printf("%i\n",index );
-        free(dummy_data);
-        sensor_t * element; // element staat al in heap door sensor map loop
-        element = dpl_get_element_at_index(sensor_list, index);
-        if(element == NULL)printf("amen\n");
-        printf("amen before\n");
-        element->ts = sensor_data->ts;
-        printf("amen after\n");
+            sensor_t * element = datamgr_get_sensor_with_id(sensor_data->id);
+            element->ts = sensor_data->ts;
 
-        for (int i = 0; i < RUN_AVG_LENGTH; i++){ //find empty spot in run_value[]
-            if(element->run_value[RUN_AVG_LENGTH-1] != 0){
-                sensor_value_t avg = datamgr_get_avg(element->sensor_id);
-                if (avg <  SET_MIN_TEMP){ 
-                    fprintf(stderr,"under min: %f\n", avg);
+            for (int i = 0; i < RUN_AVG_LENGTH; i++){ //find empty spot in run_value[]
+                if(element->run_value[RUN_AVG_LENGTH-1] != 0){
+                    sensor_value_t avg = datamgr_get_avg(element->sensor_id);
+                    if (avg <  SET_MIN_TEMP){ 
+                        fprintf(stderr,"under min: %f\n", avg);
+                    }
+                    if (avg > SET_MAX_TEMP){ 
+                        fprintf(stderr,"over max: %f\n",avg);
+                    }
+                    for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
+                        element->run_value[j] = 0;
+                    }
                 }
-                if (avg > SET_MAX_TEMP){ 
-                    fprintf(stderr,"over max: %f\n",avg);
-                }
-                for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
-                    element->run_value[j] = 0;
+                if(element->run_value[i] == 0){ 
+                    element->run_value[i] = sensor_data->value;
+                    break;
                 }
             }
-            if(element->run_value[i] == 0){ 
-                element->run_value[i] = sensor_data->value;
-                break;
-            }
-        }
-    }    
+            latest = time(NULL);
+        }    
+    } while (time(NULL) - latest < TIMEOUT);
 }
 
 void datamgr_free(){

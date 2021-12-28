@@ -88,11 +88,10 @@ int insert_sensor_from_file(DBCONN *conn, sbuffer_t * sbuffer){
 	do{
 		while ((sensor_data = sbuffer_next(sbuffer,1)) != NULL){
 			int result = insert_sensor(conn, sensor_data->id, sensor_data->value, sensor_data->ts);
-			printf("sensor id = %i - temperature = %g - timestamp = %li\n",
-						sensor_data->id, sensor_data->value, sensor_data->ts);
+			// printf("sensor id = %i - temperature = %g - timestamp = %li\n",
+			// 			sensor_data->id, sensor_data->value, sensor_data->ts);
 			latest = time(NULL);
 			if(result != 0)return result;
-			printf("inside nested\n");
 		}
 	} while (time(NULL) - latest < TIMEOUT);
 	free(sensor_data);
