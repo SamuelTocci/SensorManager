@@ -46,6 +46,8 @@ int sbuffer_init(sbuffer_t **buffer) { //thread safety not needed, only used whe
     pthread_rwlockattr_init(attr);
     pthread_rwlockattr_setpshared(attr, PTHREAD_PROCESS_SHARED);
     pthread_rwlock_init((*buffer)->tail_rwlock, attr);
+    free(attr);
+    free((*buffer)->tail_rwlock);
     return SBUFFER_SUCCESS;
 }
 

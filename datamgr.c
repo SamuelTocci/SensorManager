@@ -42,13 +42,13 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
     //TODO: add catch if files are not opened correctly
     sensor_list = dpl_create(element_copy, element_free, element_compare);
     while (fscanf(fp_sensor_map, "%hd %hd", &curr_room, &curr_sensor)>0){
-        sensor_t * sensor = malloc(sizeof(sensor_t));
-        sensor->sensor_id = curr_sensor;
-        sensor->room_id = curr_room;
+        sensor_t sensor;
+        sensor.sensor_id = curr_sensor;
+        sensor.room_id = curr_room;
         for (int i = 0; i < RUN_AVG_LENGTH ; i++){
-            sensor->run_value[i] = 0;
+            sensor.run_value[i] = 0;
         }
-        dpl_insert_at_index(sensor_list, sensor,-1,true); //initialize sensor in sensorlist
+        dpl_insert_at_index(sensor_list, &sensor,-1,true); //initialize sensor in sensorlist
     }
 
     sensor_data_t_packed * sensor_data;
@@ -61,6 +61,7 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
                 char * send_buf; 
                 asprintf(&send_buf, "Received sensor data with invalid sensor node ID %i", sensor_data->id);
                 write_to_fifo(send_buf);
+                free(send_buf);
             } else {
                 element->ts = sensor_data->ts;
                 for (int i = 0; i < RUN_AVG_LENGTH; i++){ //find empty spot in run_value[]
@@ -76,6 +77,7 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
                             char * send_buf; 
                             asprintf(&send_buf, "The sensor node with id %i reports it’s too hot (running avgtemperature = %f)", element->sensor_id, avg);
                             write_to_fifo(send_buf);
+                            free(send_buf);
                         }
                         for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
                             element->run_value[j] = 0;

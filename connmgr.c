@@ -73,6 +73,7 @@ void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
     char * send_buf;
     asprintf(&send_buf, "Listening for incoming connections on port %i", port_nr);
     write_to_fifo(send_buf);
+    free(send_buf);
     do{
         int poll_result;
         poll_result = poll(poll_fds, conn_count +1,TIMEOUT*1000);
@@ -114,6 +115,7 @@ void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
                         char * send_buf;
                         asprintf(&send_buf, "A sensor node with id %i has opened a new connection", data->id);
                         write_to_fifo(send_buf);
+                        free(send_buf);
                         new_connection = false;
                     }
                 }
@@ -128,6 +130,7 @@ void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
                 int removal_id = ((tcp_dpl_t *)dpl_get_element_at_index(sockets, i))->id;
                 asprintf(&send_buf, "The sensor node with id %i has closed the connection", removal_id);
                 write_to_fifo(send_buf);
+                free(send_buf);
                 dpl_remove_at_index(sockets,i,true);
                 conn_count--;
             }

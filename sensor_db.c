@@ -60,6 +60,7 @@ DBCONN *init_connection(char clear_up_flag){
 		char * send_buf;
 		asprintf(&send_buf, "New table %s created", TO_STRING(TABLE_NAME));
 		write_to_fifo(send_buf);
+		free(send_buf);
 	}
 	free(query);
 	return conn;
@@ -96,8 +97,6 @@ int insert_sensor_from_file(DBCONN *conn, sbuffer_t * sbuffer){
 	do{
 		while ((sensor_data = sbuffer_next(sbuffer,1)) != NULL){
 			int result = insert_sensor(conn, sensor_data->id, sensor_data->value, sensor_data->ts);
-			// printf("sensor id = %i - temperature = %g - timestamp = %li\n",
-			// 			sensor_data->id, sensor_data->value, sensor_data->ts);
 			latest = time(NULL);
 			if(result != 0)return result;
 		}

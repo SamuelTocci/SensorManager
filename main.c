@@ -18,6 +18,7 @@ void datamgr_routine(){
 
     datamgr_parse_sensor_files(map, sbuffer);
     datamgr_free();
+    fclose(map);
 }
 
 void db_routine(){
@@ -28,7 +29,6 @@ void db_routine(){
 }
 
 int main(int argc, char const *argv[]){
-    sbuffer_init(&sbuffer);
 
     int pid = fork();
 	if(pid == 0){//child process, log mngr
@@ -37,7 +37,7 @@ int main(int argc, char const *argv[]){
         } while (1);
 		
 	} else { //parent process, main
-
+        sbuffer_init(&sbuffer);
         pthread_t * connmgr_pthread = malloc(sizeof(pthread_t));
         pthread_create(connmgr_pthread, NULL,(void *) &connmgr_routine, (void *) argv[1]);
         pthread_t * datamgr_pthread = malloc(sizeof(pthread_t));
@@ -48,8 +48,12 @@ int main(int argc, char const *argv[]){
         pthread_join(*connmgr_pthread, NULL);
         pthread_join(*datamgr_pthread, NULL);
         pthread_join(*db_pthread, NULL);
+        
+        free(connmgr_pthread);
+        free(datamgr_pthread);
+        free(db_pthread);
+        sbuffer_free(&sbuffer);
     }
-    sbuffer_free(&sbuffer);
 
     return 0;
 }

@@ -71,3 +71,35 @@
 12 1640790233 New SQL data entry 
 13 1640790239 The sensor node with id 23 has closed the connection 
 14 1640790248 Connection to SQL server lost 
+15 1640790717 Listening for incoming connections on port 5678 
+16 1640790723 Connection to SQL server established 
+17 1640790723 New table SensorData created 
+18 1640790738 Connection to SQL server lost 
+19 1640790865 Listening for incoming connections on port 5678 
+20 1640790870 Connection to SQL server established 
+21 1640790870 New table SensorData created 
+22 1640790885 Connection to SQL server lost 
+23 1640790919 Listening for incoming connections on port 5678 
+24 1640790924 Connection to SQL server established 
+25 1640790924 New table SensorData created 
+26 1640790939 Connection to SQL server lost 
+27 1640791317 Listening for incoming connections on port 5678 
+28 1640791319 Connection to SQL server established 
+29 1640791319 New table SensorData created 
+30 1640791334 Connection to SQL server lost 
+1 1640791570 Listening for incoming connections on port 5678 
+31 1640791575 Connection to SQL server established 
+1 1640791575 New table SensorData created 
+32 1640791590 Connection to SQL server lost 
+33 1640791661 Listening for incoming connections on port 5678 
+34 1640791664 Connection to SQL server established 
+2 1640791666 New table SensorData created 
+35 1640791681 Connection to SQL server lost 
+36 1640792022 Listening for incoming connections on port 5678 
+2 1640792027 Connection to SQL server established 
+37 1640792027 New table SensorData created 
+38 1640792042 Connection to SQL server lost 
+39 1640792315 Listening for incoming connections on port 5678 
+40 1640792320 Connection to SQL server established 
+1 1640792320 New table SensorData created 
+1 1640792335 Connection to SQL server lost 
