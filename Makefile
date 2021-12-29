@@ -53,7 +53,8 @@ clean:
 clean-all: clean
 	rm -rf lib/*.so
 
-run : sensor_gateway sensor_node
+run: sensor_gateway sensor_node
+	rm LOGFIFO
 	@echo "$(TITLE_COLOR)\n***** TEST RUN ACTIVE *****$(NO_COLOR)"
 	./sensor_gateway 5678
 

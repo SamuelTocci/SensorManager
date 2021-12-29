@@ -14,14 +14,21 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <pthread.h>
 #include "sbuffer.h"
 
 #define FIFO_NAME "LOGFIFO"
 #define MAXBUFF 80
 
+int log_line;
+
+pthread_mutex_t fifo_mutex;
 typedef int (*callback_t)(void *, int, char **, char **);
 
 DBCONN *init_connection(char clear_up_flag){
+	if(pthread_mutex_init(&fifo_mutex, NULL) != 0) exit(EXIT_FAILURE);
+	log_line = 0;
+
 	sqlite3 *conn;
 	char *err_msg = 0;
 	char *query;
@@ -196,8 +203,8 @@ void write_to_fifo(const char * send_buf){
 	result = mkfifo(FIFO_NAME, 0666);
 	CHECK_MKFIFO(result); 
 
+	pthread_mutex_lock(&fifo_mutex);
 	fptr = fopen(FIFO_NAME, "w"); 
-	//printf("syncing with reader ok\n");
 	FILE_OPEN_ERROR(fptr);
 
 	if ( fputs( send_buf, fptr ) == EOF )
@@ -206,34 +213,41 @@ void write_to_fifo(const char * send_buf){
 		exit( EXIT_FAILURE );
 	} 
 	FFLUSH_ERROR(fflush(fptr));
-	//printf("Message send: %s \n", send_buf); 
 
 	result = fclose( fptr );
 	FILE_CLOSE_ERROR(result);
+	pthread_mutex_unlock(&fifo_mutex);
 }
 
 void read_from_fifo(){
 	int result;
 	char *str_result;
-	char recv_buf[MAXBUFF]; 
+	char recv_buf[MAXBUFF];
 	FILE *fptr;
+
+	// FILE *log;
 	/* Create the FIFO if it does not exist */ 
 	result = mkfifo(FIFO_NAME, 0666);
 	CHECK_MKFIFO(result); 
 	
 	fptr = fopen(FIFO_NAME, "r"); 
-	//printf("syncing with writer ok\n");
 	FILE_OPEN_ERROR(fptr);
 
-	do 
-	{
+	// log = fopen("gateway.log", "w");
+	// FILE_OPEN_ERROR(log);
+
+	FFLUSH_ERROR(fflush(fptr));
+	pthread_mutex_lock(&fifo_mutex);
+	do{
 		str_result = fgets(recv_buf, MAXBUFF, fptr);
-		if ( str_result != NULL )
-		{ 
-			printf("LOG: %s \n", recv_buf); //TODO: make it write to gateway.log
+		if (str_result != NULL){
+			log_line ++;
+			printf("LOG:[%i] %s \n", log_line, recv_buf); //TODO: make it write to gateway.log
 		}
-	} while ( str_result != NULL ); 
+	} while ( str_result != NULL );
 
 	result = fclose( fptr );
 	FILE_CLOSE_ERROR(result);
+	pthread_mutex_unlock(&fifo_mutex);
+
 }

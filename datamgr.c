@@ -58,6 +58,7 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
             element->ts = sensor_data->ts;
 
             for (int i = 0; i < RUN_AVG_LENGTH; i++){ //find empty spot in run_value[]
+                // printf("run_value: %f\n",element->run_value[i] );
                 if(element->run_value[RUN_AVG_LENGTH-1] != 0){
                     sensor_value_t avg = datamgr_get_avg(element->sensor_id);
                     if (avg <  SET_MIN_TEMP){ 

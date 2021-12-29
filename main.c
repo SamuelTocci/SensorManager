@@ -53,6 +53,7 @@ int main(int argc, char const *argv[]){
         pthread_join(*datamgr_pthread, NULL);
         pthread_join(*db_pthread, NULL);
     }
+    sbuffer_free(&sbuffer);
 
     return 0;
 }
