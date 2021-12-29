@@ -36,6 +36,7 @@
 #ifndef TIMEOUT
 #endif
 
+
 typedef uint16_t sensor_id_t;
 typedef uint16_t room_id_t;
 typedef double sensor_value_t;
@@ -68,6 +69,7 @@ struct tcpsock {
 typedef struct{
     sensor_ts_t last_active;
     tcpsock_t * socket;
+    sensor_id_t id;
 }tcp_dpl_t;
 
 

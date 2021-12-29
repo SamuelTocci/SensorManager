@@ -2,6 +2,8 @@
  * \author Samuel Tocci
  */
 
+#define _GNU_SOURCE
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -55,25 +57,34 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
         while ((sensor_data = sbuffer_next(sbuffer, 0)) != NULL){
 
             sensor_t * element = datamgr_get_sensor_with_id(sensor_data->id);
-            element->ts = sensor_data->ts;
-
-            for (int i = 0; i < RUN_AVG_LENGTH; i++){ //find empty spot in run_value[]
-                // printf("run_value: %f\n",element->run_value[i] );
-                if(element->run_value[RUN_AVG_LENGTH-1] != 0){
-                    sensor_value_t avg = datamgr_get_avg(element->sensor_id);
-                    if (avg <  SET_MIN_TEMP){ 
-                        fprintf(stderr,"under min: %f\n", avg);
+            if(element == NULL){
+                char * send_buf; 
+                asprintf(&send_buf, "Received sensor data with invalid sensor node ID %i", sensor_data->id);
+                write_to_fifo(send_buf);
+            } else {
+                element->ts = sensor_data->ts;
+                for (int i = 0; i < RUN_AVG_LENGTH; i++){ //find empty spot in run_value[]
+                    // printf("run_value: %f\n",element->run_value[i] );
+                    if(element->run_value[RUN_AVG_LENGTH-1] != 0){
+                        sensor_value_t avg = datamgr_get_avg(element->sensor_id);
+                        if (avg <  SET_MIN_TEMP){
+                            char * send_buf; 
+                            asprintf(&send_buf, "The sensor node with id %i reports it’s too cold (running avgtemperature = %f)", element->sensor_id, avg);
+                            write_to_fifo(send_buf);
+                        }
+                        if (avg > SET_MAX_TEMP){ 
+                            char * send_buf; 
+                            asprintf(&send_buf, "The sensor node with id %i reports it’s too hot (running avgtemperature = %f)", element->sensor_id, avg);
+                            write_to_fifo(send_buf);
+                        }
+                        for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
+                            element->run_value[j] = 0;
+                        }
                     }
-                    if (avg > SET_MAX_TEMP){ 
-                        fprintf(stderr,"over max: %f\n",avg);
+                    if(element->run_value[i] == 0){ 
+                        element->run_value[i] = sensor_data->value;
+                        break;
                     }
-                    for (int j = 0; j < RUN_AVG_LENGTH; j++){ //empty run_value[]
-                        element->run_value[j] = 0;
-                    }
-                }
-                if(element->run_value[i] == 0){ 
-                    element->run_value[i] = sensor_data->value;
-                    break;
                 }
             }
             latest = time(NULL);
@@ -116,7 +127,8 @@ int datamgr_get_total_sensors(){
 void *datamgr_get_sensor_with_id(sensor_id_t sensor_id){
     sensor_data_t_packed *dummy_data = malloc(sizeof(sensor_data_t_packed));
     dummy_data->id = sensor_id;
-    int index = dpl_get_index_of_element(sensor_list, dummy_data);
+    int index = dpl_get_index_of_element(sensor_list, dummy_data); //returns -1 if no elements match
+    if(index == -1) return NULL;
     free(dummy_data);
 
     sensor_t * element = dpl_get_element_at_index(sensor_list, index);

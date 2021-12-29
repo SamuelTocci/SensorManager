@@ -1,0 +1,73 @@
+1 1640788982 Listening for incoming connections on port 5678 
+2 1640788982 Connection to SQL server established 
+3 1640788982 New table SensorData created 
+4 1640788984 A sensor node with id 23 has opened a new connection 
+5 1640788986 New SQL data entry 
+6 1640788988 New SQL data entry 
+7 1640788990 New SQL data entry 
+8 1640788992 New SQL data entry 
+9 1640788994 New SQL data entry 
+10 1640788996 The sensor node with id 142 reports it’s too hot (running avgtemperature = 19 
+11 1640788996 .979160) 
+12 1640788996 New SQL data entry 
+13 1640789002 The sensor node with id 23 has closed the connection 
+14 1640789011 Connection to SQL server lost 
+1 1640789037 Listening for incoming connections on port 5678 
+2 1640789037 New table SensorData created 
+3 1640789039 A sensor node with id 23 has opened a new connection 
+4 1640789045 The sensor node with id 23 has closed the connection 
+5 1640789052 Connection to SQL server lost 
+1 1640789124 Listening for incoming connections on port 5678 
+2 1640789124 Connection to SQL server established 
+3 1640789124 New table SensorData created 
+4 1640789126 A sensor node with id 23 has opened a new connection 
+5 1640789132 The sensor node with id 23 has closed the connection 
+6 1640789139 Connection to SQL server lost 
+1 1640789175 Listening for incoming connections on port 5678 
+2 1640789175 Connection to SQL server established 
+3 1640789175 New table SensorData created 
+4 1640789176 A sensor node with id 23 has opened a new connection 
+5 1640789178 New SQL data entry 
+6 1640789180 New SQL data entry 
+7 1640789186 The sensor node with id 23 has closed the connection 
+8 1640789195 Connection to SQL server lost 
+1 1640790069 Listening for incoming connections on port 5678 
+2 1640790069 Connection to SQL server established 
+3 1640790069 New table SensorData created 
+4 1640790070 A sensor node with id 23 has opened a new connection 
+5 1640790072 Received sensor data with invalid sensor node ID 23 
+6 1640790104 Listening for incoming connections on port 5678 
+7 1640790104 Connection to SQL server established 
+8 1640790104 New table SensorData created 
+9 1640790107 A sensor node with id 23 has opened a new connection 
+10 1640790109 New SQL data entry 
+1 1640790111 New SQL data entry 
+2 1640790113 New SQL data entry 
+3 1640790115 New SQL data entry 
+4 1640790121 The sensor node with id 23 has closed the connection 
+5 1640790130 Connection to SQL server lost 
+11 1640790136 Listening for incoming connections on port 5678 
+6 1640790136 Connection to SQL server established 
+7 1640790136 New table SensorData created 
+12 1640790137 A sensor node with id 23 has opened a new connection 
+1 1640790139 Received sensor data with invalid sensor node ID 23 
+13 1640790139 New SQL data entry 
+1 1640790182 Listening for incoming connections on port 5678 
+2 1640790182 Connection to SQL server established 
+3 1640790182 New table SensorData created 
+4 1640790183 A sensor node with id 23 has opened a new connection 
+5 1640790185 Received sensor data with invalid sensor node ID 23 
+1 1640790224 Listening for incoming connections on port 5678 
+2 1640790224 Connection to SQL server established 
+3 1640790224 New table SensorData created 
+4 1640790225 A sensor node with id 23 has opened a new connection 
+5 1640790227 Received sensor data with invalid sensor node ID 23 
+6 1640790227 New SQL data entry 
+7 1640790229 Received sensor data with invalid sensor node ID 23 
+8 1640790229 New SQL data entry 
+9 1640790231 Received sensor data with invalid sensor node ID 23 
+10 1640790231 New SQL data entry 
+11 1640790233 Received sensor data with invalid sensor node ID 23 
+12 1640790233 New SQL data entry 
+13 1640790239 The sensor node with id 23 has closed the connection 
+14 1640790248 Connection to SQL server lost 

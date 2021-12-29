@@ -36,13 +36,13 @@ DBCONN *init_connection(char clear_up_flag){
 	/* Establish connection to db */
 	int result = sqlite3_open(TO_STRING(DB_NAME), &conn);
 	if (result != SQLITE_OK){
-		const char * send_buf = sqlite3_errmsg(conn);
+		const char * send_buf = "Unable to connect to SQL server";
 		write_to_fifo(send_buf);
 		
 		sqlite3_close(conn);
 		return NULL;
 	} else {
-		const char * send_buf = "Connected to DataBase";
+		const char * send_buf = "Connection to SQL server established";
 		write_to_fifo(send_buf);
 	}
 	/* Creating (and clearing) Table */
@@ -57,7 +57,8 @@ DBCONN *init_connection(char clear_up_flag){
 		const char * send_buf = sqlite3_errmsg(conn);
 		write_to_fifo(send_buf);
 	} else {
-		const char * send_buf = "Created Table";
+		char * send_buf;
+		asprintf(&send_buf, "New table %s created", TO_STRING(TABLE_NAME));
 		write_to_fifo(send_buf);
 	}
 	free(query);
@@ -66,7 +67,7 @@ DBCONN *init_connection(char clear_up_flag){
 
 void disconnect(DBCONN *conn){
 	sqlite3_close(conn);
-	const char * send_buf = "Disconnected DataBase";
+	const char * send_buf = "Connection to SQL server lost";
 	write_to_fifo(send_buf);
 }
 
@@ -83,7 +84,7 @@ int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_
 		write_to_fifo(send_buf);
 		return 1;
 	} else {
-		const char * send_buf = "Inserted Sensor";
+		const char * send_buf = "New SQL data entry";
 		write_to_fifo(send_buf);
 	}
 	return 0;
@@ -100,7 +101,8 @@ int insert_sensor_from_file(DBCONN *conn, sbuffer_t * sbuffer){
 			latest = time(NULL);
 			if(result != 0)return result;
 		}
-	} while (time(NULL) - latest < TIMEOUT);
+	} while (time(NULL) - latest < 3*TIMEOUT);
+
 	free(sensor_data);
 	return 0;
 }
@@ -225,7 +227,7 @@ void read_from_fifo(){
 	char recv_buf[MAXBUFF];
 	FILE *fptr;
 
-	// FILE *log;
+	FILE *log;
 	/* Create the FIFO if it does not exist */ 
 	result = mkfifo(FIFO_NAME, 0666);
 	CHECK_MKFIFO(result); 
@@ -233,8 +235,8 @@ void read_from_fifo(){
 	fptr = fopen(FIFO_NAME, "r"); 
 	FILE_OPEN_ERROR(fptr);
 
-	// log = fopen("gateway.log", "w");
-	// FILE_OPEN_ERROR(log);
+	log = fopen("gateway.log", "a");
+	FILE_OPEN_ERROR(log);
 
 	FFLUSH_ERROR(fflush(fptr));
 	pthread_mutex_lock(&fifo_mutex);
@@ -242,11 +244,17 @@ void read_from_fifo(){
 		str_result = fgets(recv_buf, MAXBUFF, fptr);
 		if (str_result != NULL){
 			log_line ++;
-			printf("LOG:[%i] %s \n", log_line, recv_buf); //TODO: make it write to gateway.log
+			#ifdef DEBUG 
+				printf("LOG:[%i] <%li> %s \n", log_line, time(NULL), recv_buf); //TODO: make it write to gateway.log
+			#endif
+			fprintf(log,"%i %li %s \n", log_line, time(NULL), recv_buf);
 		}
 	} while ( str_result != NULL );
 
 	result = fclose( fptr );
+	FILE_CLOSE_ERROR(result);
+
+	result = fclose(log);
 	FILE_CLOSE_ERROR(result);
 	pthread_mutex_unlock(&fifo_mutex);
 
