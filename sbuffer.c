@@ -42,12 +42,7 @@ int sbuffer_init(sbuffer_t **buffer) { //thread safety not needed, only used whe
     (*buffer)->storage_curr = NULL;
     (*buffer)->data_curr = NULL;
     (*buffer)->tail_rwlock = malloc(sizeof(pthread_rwlock_t));
-    pthread_rwlockattr_t * attr = malloc(sizeof(pthread_rwlockattr_t));
-    pthread_rwlockattr_init(attr);
-    pthread_rwlockattr_setpshared(attr, PTHREAD_PROCESS_SHARED);
-    pthread_rwlock_init((*buffer)->tail_rwlock, attr);
-    free(attr);
-    free((*buffer)->tail_rwlock);
+    pthread_rwlock_init((*buffer)->tail_rwlock, NULL);
     return SBUFFER_SUCCESS;
 }
 
@@ -61,6 +56,8 @@ int sbuffer_free(sbuffer_t **buffer) { //thread safety not needed, only used whe
         (*buffer)->head = (*buffer)->head->next;
         free(dummy);
     }
+    pthread_rwlock_destroy((*buffer)->tail_rwlock);
+    free((*buffer)->tail_rwlock);
     free(*buffer);
     *buffer = NULL;
     return SBUFFER_SUCCESS;

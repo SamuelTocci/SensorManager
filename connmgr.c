@@ -85,6 +85,7 @@ void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
                 ALLOCFAILURE(poll_fds);
                 tcp_get_sd(client->socket, &(poll_fds[conn_count+1].fd));
                 poll_fds[conn_count+1].events = POLLIN;
+                poll_fds[conn_count+1].revents = 0;
                 client->last_active = (sensor_ts_t) time(NULL);
                 dpl_insert_at_index(sockets, client, conn_count+1, true);
                 conn_count++;
@@ -119,6 +120,7 @@ void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
                         new_connection = false;
                     }
                 }
+                free(data);
             }
             time_diff = time(NULL) - curr_client->last_active;
             if(time_diff > TIMEOUT){
