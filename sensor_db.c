@@ -18,7 +18,7 @@
 #include "sbuffer.h"
 
 #define FIFO_NAME "LOGFIFO"
-#define MAXBUFF 80
+#define MAXBUFF 90
 
 int log_line;
 

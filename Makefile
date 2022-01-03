@@ -62,13 +62,8 @@ gdb: sensor_gateway sensor_node
 	CK_FORK=no gdb --args ./sensor_gateway 5678
 
 valgrind: sensor_gateway sensor_node
+	rm LOGFIFO
 	valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./sensor_gateway 5678
-
-nodes:
-	./sensor_node 15 2 127.0.0.1 5678 &	
-	./sensor_node 21 2 127.0.0.1 5678 &
-	./sensor_node 37 2 127.0.0.1 5678 &
-	./sensor_node 49 4 127.0.0.1 5678 &
 
 zip:
 	zip lab_final.zip main.c connmgr.c connmgr.h datamgr.c datamgr.h sbuffer.c sbuffer.h sensor_db.c sensor_db.h config.h lib/dplist.c lib/dplist.h lib/tcpsock.c lib/tcpsock.h
