@@ -55,7 +55,6 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
     time_t latest = time(NULL);
     do{
         while ((sensor_data = sbuffer_next(sbuffer, 0)) != NULL){
-
             sensor_t * element = datamgr_get_sensor_with_id(sensor_data->id);
             if(element == NULL){
                 char * send_buf; 

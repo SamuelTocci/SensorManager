@@ -63,11 +63,10 @@ int sbuffer_free(sbuffer_t **buffer) { //thread safety not needed, only used whe
     return SBUFFER_SUCCESS;
 }
 
-int sbuffer_remove(sbuffer_t *buffer, sensor_data_t_packed *data) {
+int sbuffer_remove(sbuffer_t *buffer) {
     if (buffer == NULL) return SBUFFER_FAILURE;
     if (buffer->head == NULL) return SBUFFER_NO_DATA;
     sbuffer_node_t *dummy;
-    *data = buffer->head->data;
     dummy = buffer->head;
     if (buffer->head == buffer->tail) // buffer has only one node
     {
@@ -119,8 +118,15 @@ sensor_data_t_packed * sbuffer_next(sbuffer_t * sbuffer, char process){
             pthread_mutex_lock(&sbuffer->data_curr->reads_left_mutex);
             sbuffer->data_curr->reads_left --;
             // printf("DATA: %i\n",sbuffer->data_curr->reads_left );
-            // if(sbuffer->data_curr->reads_left <= 0)printf("reads op 0\n");// sbuffer_remove(sbuffer, data);
+            if(sbuffer->data_curr->reads_left <= 0){
+				sbuffer_remove(sbuffer);
+				// pthread_mutex_unlock(&sbuffer->data_curr->reads_left_mutex);
+				printf("return deleted data_curr data\n");
+				// return data;
+
+			}
             pthread_mutex_unlock(&sbuffer->data_curr->reads_left_mutex);
+			printf("return normal data_curr\n");
 
             // printf("%f\n", sbuffer->data_curr->data.value );
             return &sbuffer->data_curr->data;
@@ -136,8 +142,14 @@ sensor_data_t_packed * sbuffer_next(sbuffer_t * sbuffer, char process){
             pthread_mutex_lock(&sbuffer->storage_curr->reads_left_mutex);
             sbuffer->storage_curr->reads_left --;
             // printf("STORAGE: %i\n",sbuffer->storage_curr->reads_left ); 
-            // if(sbuffer->storage_curr->reads_left <= 0) printf("reads op 1\n");//sbuffer_remove(sbuffer, data);
+            if(sbuffer->storage_curr->reads_left <= 0){
+                sbuffer_remove(sbuffer);
+                // pthread_mutex_unlock(&sbuffer->storage_curr->reads_left_mutex);
+				printf("return deleted storage_curr data\n");
+                // return data;
+            }
             pthread_mutex_unlock(&sbuffer->storage_curr->reads_left_mutex);
+			printf("return normal storage_curr\n");
 
             // printf("%f\n",sbuffer->storage_curr->data.value );
             return &sbuffer->storage_curr->data;
@@ -146,9 +158,3 @@ sensor_data_t_packed * sbuffer_next(sbuffer_t * sbuffer, char process){
     }
     return NULL;
 }
-
-// TODO: make program threadsafe
-// threadsafety as granular as possible
-// mutex, semaphore, rwlock, barrier, condition var
-// cancellation safety implementation p31
-

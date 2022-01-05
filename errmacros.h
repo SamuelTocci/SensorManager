@@ -11,6 +11,15 @@
 				exit( EXIT_FAILURE );						\
 			}												\
 		} while(0)
+
+#define FORK_ERROR(err) 									\
+		do {												\
+			if ( (err) == -1 )								\
+			{												\
+				perror("Fork Error");			\
+				exit( EXIT_FAILURE );						\
+			}												\
+		} while(0)
 		
 #define CHECK_MKFIFO(err) 									\
 		do {												\
@@ -60,4 +69,11 @@
 			}												\
 		} while(0)
 
+#define ALLOCFAILURE(al)    \
+    if(al == NULL){         \
+        free(al);          \
+        printf("alloc failure\n");\
+        exit(EXIT_FAILURE); \
+    }
 #endif
+

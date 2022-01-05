@@ -3,6 +3,7 @@
 #include "sensor_db.h"
 #include "datamgr.h"
 #include "connmgr.h"
+#include "errmacros.h"
 #include <pthread.h>
 #include <unistd.h>
 
@@ -31,6 +32,8 @@ void db_routine(){
 int main(int argc, char const *argv[]){
 
     int pid = fork();
+    FORK_ERROR(pid);
+
 	if(pid == 0){//child process, log mngr
         do{
             read_from_fifo();

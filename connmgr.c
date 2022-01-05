@@ -13,13 +13,7 @@
 #include <sys/poll.h>
 #include <unistd.h>
 #include "sbuffer.h"
-
-#define ALLOCFAILURE(al)    \
-    if(al == NULL){         \
-        free(al);          \
-        printf("alloc failure\n");\
-        exit(EXIT_FAILURE); \
-    }
+#include "errmacros.h"
 
 /**
  * SELECT vs POLL vs EPOLL
