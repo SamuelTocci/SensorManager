@@ -27,7 +27,6 @@
 /* global variables */
 dplist_t * sockets;
 
-
 void socket_free(void ** element){
     tcp_close(&((tcp_dpl_t *) *element)->socket);
     free(*element);
@@ -107,7 +106,6 @@ void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
                     /** LOG new connection **/
                     if(i == conn_count-1 && new_connection){
                         curr_client->id = data->id;
-                        char * send_buf;
                         asprintf(&send_buf, "A sensor node with id %i has opened a new connection", data->id);
                         write_to_fifo(send_buf);
                         free(send_buf);
@@ -121,8 +119,7 @@ void connmgr_listen(int port_nr, sbuffer_t * sbuffer){
                 for (int y = i +1; y < conn_count -1; y++) poll_fds[y] = poll_fds[y+1]; //shift all items in poll_fds to remove hole
                 poll_fds = (pollfd_t *) realloc(poll_fds, sizeof(pollfd_t)*(conn_count)); //=conn_count +1 -1
                 ALLOCFAILURE(poll_fds);
-                
-                char * send_buf;
+
                 int removal_id = ((tcp_dpl_t *)dpl_get_element_at_index(sockets, i))->id;
                 asprintf(&send_buf, "The sensor node with id %i has closed the connection", removal_id);
                 write_to_fifo(send_buf);

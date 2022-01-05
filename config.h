@@ -10,10 +10,14 @@
 #include <sys/poll.h>
 #include "lib/tcpsock.h"
 
-#ifndef SET_MIN_TEMP
+#ifndef RUN_AVG_LENGTH
+#define RUN_AVG_LENGTH 5
 #endif
 
 #ifndef SET_MAX_TEMP
+#endif
+
+#ifndef SET_MIN_TEMP
 #endif
 
 #ifndef DB_NAME
@@ -24,18 +28,15 @@
 #define TABLE_NAME SensorData
 #endif
 
-#define DBCONN sqlite3
+#ifndef TIMEOUT
+#endif
 
 #define REAL_TO_STRING(s) #s
 #define TO_STRING(s) REAL_TO_STRING(s)
 
-#ifndef OUTPUT_NAME
-#define OUTPUT_NAME "sensor_data_recv"
-#endif
+#define FIFO_NAME "LOGFIFO"
 
-#ifndef TIMEOUT
-#endif
-
+#define DBCONN sqlite3
 
 typedef uint16_t sensor_id_t;
 typedef uint16_t room_id_t;

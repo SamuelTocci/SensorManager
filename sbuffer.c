@@ -8,6 +8,7 @@
 #include "sbuffer.h"
 #include <semaphore.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 /**
  * basic node for the buffer, these nodes are linked together to create the buffer
@@ -43,6 +44,7 @@ int sbuffer_init(sbuffer_t **buffer) { //thread safety not needed, only used whe
     (*buffer)->data_curr = NULL;
     (*buffer)->tail_rwlock = malloc(sizeof(pthread_rwlock_t));
     pthread_rwlock_init((*buffer)->tail_rwlock, NULL);
+	
     return SBUFFER_SUCCESS;
 }
 
@@ -87,6 +89,7 @@ int sbuffer_insert(sbuffer_t *buffer, sensor_data_t_packed *data) { //reads_sem 
     if (dummy == NULL) return SBUFFER_FAILURE;
     dummy->data = *data;
     dummy->next = NULL;
+
     /** Thread Safety **/
     pthread_mutex_init(&dummy->reads_left_mutex, NULL);
     dummy->reads_left = 2;
@@ -101,12 +104,12 @@ int sbuffer_insert(sbuffer_t *buffer, sensor_data_t_packed *data) { //reads_sem 
         buffer->tail = buffer->tail->next;
     }
     pthread_rwlock_unlock(buffer->tail_rwlock);
+
     return SBUFFER_SUCCESS;
 }
 
 sensor_data_t_packed * sbuffer_next(sbuffer_t * sbuffer, char process){
     if(sbuffer->head == NULL) return NULL;
-    // sensor_data_t_packed * data = malloc(sizeof(sensor_data_t_packed));
 
     switch (process){
     case 0:
@@ -115,20 +118,14 @@ sensor_data_t_packed * sbuffer_next(sbuffer_t * sbuffer, char process){
         } else {
             if(sbuffer->data_curr->next != NULL)sbuffer->data_curr = sbuffer->data_curr->next;
             else return NULL;
+
             pthread_mutex_lock(&sbuffer->data_curr->reads_left_mutex);
             sbuffer->data_curr->reads_left --;
-            // printf("DATA: %i\n",sbuffer->data_curr->reads_left );
             if(sbuffer->data_curr->reads_left <= 0){
 				sbuffer_remove(sbuffer);
-				// pthread_mutex_unlock(&sbuffer->data_curr->reads_left_mutex);
-				printf("return deleted data_curr data\n");
-				// return data;
-
 			}
             pthread_mutex_unlock(&sbuffer->data_curr->reads_left_mutex);
-			printf("return normal data_curr\n");
 
-            // printf("%f\n", sbuffer->data_curr->data.value );
             return &sbuffer->data_curr->data;
         }
         break;
@@ -139,19 +136,14 @@ sensor_data_t_packed * sbuffer_next(sbuffer_t * sbuffer, char process){
         } else {
             if(sbuffer->storage_curr->next != NULL)sbuffer->storage_curr = sbuffer->storage_curr->next;
             else return NULL;
+
             pthread_mutex_lock(&sbuffer->storage_curr->reads_left_mutex);
             sbuffer->storage_curr->reads_left --;
-            // printf("STORAGE: %i\n",sbuffer->storage_curr->reads_left ); 
             if(sbuffer->storage_curr->reads_left <= 0){
                 sbuffer_remove(sbuffer);
-                // pthread_mutex_unlock(&sbuffer->storage_curr->reads_left_mutex);
-				printf("return deleted storage_curr data\n");
-                // return data;
             }
             pthread_mutex_unlock(&sbuffer->storage_curr->reads_left_mutex);
-			printf("return normal storage_curr\n");
 
-            // printf("%f\n",sbuffer->storage_curr->data.value );
             return &sbuffer->storage_curr->data;
         }
         break;

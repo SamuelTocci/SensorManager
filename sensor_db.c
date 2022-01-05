@@ -17,7 +17,6 @@
 #include <pthread.h>
 #include "sbuffer.h"
 
-#define FIFO_NAME "LOGFIFO"
 #define MAXBUFF 90
 
 int log_line;
@@ -83,12 +82,12 @@ int insert_sensor(DBCONN *conn, sensor_id_t id, sensor_value_t value, sensor_ts_
 	if (result != SQLITE_OK){
 		const char * send_buf = sqlite3_errmsg(conn);
 		write_to_fifo(send_buf);
-		return 1;
+		return DB_ERROR;
 	} else {
 		const char * send_buf = "New SQL data entry";
 		write_to_fifo(send_buf);
 	}
-	return 0;
+	return DB_SUCCESS;
 }
 
 int insert_sensor_from_file(DBCONN *conn, sbuffer_t * sbuffer){
@@ -103,97 +102,7 @@ int insert_sensor_from_file(DBCONN *conn, sbuffer_t * sbuffer){
 	} while (time(NULL) - latest < 3*TIMEOUT);
 
 	free(sensor_data);
-	return 0;
-}
-
-int find_sensor_all(DBCONN *conn, callback_t f){
-	char *query;
-	char *err_msg = 0;
-
-	asprintf(&query, "SELECT * FROM %1s", TO_STRING(TABLE_NAME));
-	int result = sqlite3_exec(conn, query, f,0, &err_msg);
-	free(query);
-	if (result != SQLITE_OK){
-		const char * send_buf = sqlite3_errmsg(conn);
-		write_to_fifo(send_buf);
-		return 1;
-	} else {
-		const char * send_buf = "Succesfull Query: Find All";
-		write_to_fifo(send_buf);
-	}
-	return 0;
-}
-
-int find_sensor_by_value(DBCONN *conn, sensor_value_t value, callback_t f){
-	char *query;
-	char *err_msg = 0;
-
-	asprintf(&query, "SELECT * FROM %1s WHERE sensor_value = %2f", TO_STRING(TABLE_NAME), value);
-	int result = sqlite3_exec(conn, query, f,0, &err_msg);
-	free(query);
-	if (result != SQLITE_OK){
-		const char * send_buf = sqlite3_errmsg(conn);
-		write_to_fifo(send_buf);
-		return 1;
-	} else {
-		const char * send_buf = "Succesfull Query: Find by Value";
-		write_to_fifo(send_buf);	
-	}
-	return 0;
-}
-
-int find_sensor_exceed_value(DBCONN *conn, sensor_value_t value, callback_t f){
-	char *query;
-	char *err_msg = 0;
-
-	asprintf(&query, "SELECT * FROM %1s WHERE sensor_value > %2f", TO_STRING(TABLE_NAME), value);
-	int result = sqlite3_exec(conn, query, f,0, &err_msg);
-	free(query);
-	if (result != SQLITE_OK){
-		const char * send_buf = sqlite3_errmsg(conn);
-		write_to_fifo(send_buf);
-		return 1;
-	} else {
-		const char * send_buf = "Succesfull Query: Find by min Value";
-		write_to_fifo(send_buf);
-	}
-	return 0;
-}
-
-int find_sensor_by_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f){
-	char *query;
-	char *err_msg = 0;
-
-	asprintf(&query, "SELECT * FROM %1s WHERE timestamp = %2ld", TO_STRING(TABLE_NAME), ts);
-	int result = sqlite3_exec(conn, query, f,0, &err_msg);
-	free(query);
-	if (result != SQLITE_OK){
-		const char * send_buf = sqlite3_errmsg(conn);
-		write_to_fifo(send_buf);
-		return 1;
-	} else {
-		const char * send_buf = "Succesfull Query: Find by ts";
-		write_to_fifo(send_buf);
-	}
-	return 0;
-}
-
-int find_sensor_after_timestamp(DBCONN *conn, sensor_ts_t ts, callback_t f){
-	char *query;
-	char *err_msg = 0;
-
-	asprintf(&query, "SELECT * FROM %1s WHERE timestamp > %2ld", TO_STRING(TABLE_NAME), ts);
-	int result = sqlite3_exec(conn, query, f,0, &err_msg);
-	free(query);
-	if (result != SQLITE_OK){
-		const char * send_buf = sqlite3_errmsg(conn);
-		write_to_fifo(send_buf);
-		return 1;
-	} else {
-		const char * send_buf = "Succesfull Query: Find by min ts";
-		write_to_fifo(send_buf);
-	}
-	return 0;
+	return DB_SUCCESS;
 }
 
 void write_to_fifo(const char * send_buf){
@@ -244,7 +153,7 @@ void read_from_fifo(){
 		if (str_result != NULL){
 			log_line ++;
 			#ifdef DEBUG 
-				printf("LOG:[%i] <%li> %s \n", log_line, time(NULL), recv_buf); //TODO: make it write to gateway.log
+				printf("LOG:[%i] <%li> %s \n", log_line, time(NULL), recv_buf);
 			#endif
 			fprintf(log,"%i %li %s \n", log_line, time(NULL), recv_buf);
 		}

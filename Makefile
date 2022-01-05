@@ -8,7 +8,7 @@ all: sensor_gateway sensor_node file_creator
 # Then check if the libraries are in the lib folder
 sensor_gateway : main.c connmgr.c datamgr.c sensor_db.c sbuffer.c lib/libdplist.so lib/libtcpsock.so
 	@echo "$(TITLE_COLOR)\n***** CPPCHECK *****$(NO_COLOR)"
-	cppcheck --enable=all --suppress=missingIncludeSystem main.c connmgr.c datamgr.c sensor_db.c sbuffer.c
+	cppcheck --enable=all --check-config --suppress=missingIncludeSystem main.c connmgr.c datamgr.c sensor_db.c sbuffer.c
 	@echo "$(TITLE_COLOR)\n***** COMPILING sensor_gateway *****$(NO_COLOR)"
 	gcc -c main.c      -Wall -std=c11 -Werror -DDEBUG -DSET_MIN_TEMP=10 -DSET_MAX_TEMP=15 -DTIMEOUT=5 -o main.o      -fdiagnostics-color=auto -g
 	gcc -c connmgr.c   -Wall -std=c11 -Werror -DDEBUG -DSET_MIN_TEMP=10 -DSET_MAX_TEMP=15 -DTIMEOUT=5 -o connmgr.o   -fdiagnostics-color=auto -g
@@ -48,13 +48,13 @@ lib/libtcpsock.so : lib/tcpsock.c
 .PHONY : clean clean-all run zip
 
 clean:
-	rm -rf *.o sensor_gateway sensor_node file_creator gateway.log *~
+	rm -rf *.o sensor_gateway sensor_node file_creator gateway.log *.zip LOGFIFO  *~
 
 clean-all: clean
 	rm -rf lib/*.so
 
 run: sensor_gateway sensor_node
-	rm LOGFIFO
+	rm -rf LOGFIFO
 	@echo "$(TITLE_COLOR)\n***** TEST RUN ACTIVE *****$(NO_COLOR)"
 	./sensor_gateway 5678
 

@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include "stdint.h"
+#include <stdint.h>
 #include "datamgr.h"
 #include "config.h"
 #include "lib/dplist.h"
@@ -41,7 +41,7 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
     sensor_id_t curr_sensor;
     //TODO: add catch if files are not opened correctly
     sensor_list = dpl_create(element_copy, element_free, element_compare);
-    while (fscanf(fp_sensor_map, "%hd %hd", &curr_room, &curr_sensor)>0){
+    while (fscanf(fp_sensor_map, "%hu %hu", &curr_room, &curr_sensor)>0){
         sensor_t sensor;
         sensor.sensor_id = curr_sensor;
         sensor.room_id = curr_room;
@@ -97,10 +97,6 @@ void datamgr_free(){
     dpl_free(&sensor_list,true);
 }
 
-uint16_t datamgr_get_room_id(sensor_id_t sensor_id){
-    sensor_t * element = datamgr_get_sensor_with_id(sensor_id);
-    return element->room_id;
-}
 
 sensor_value_t datamgr_get_avg(sensor_id_t sensor_id){
     sensor_t * element = datamgr_get_sensor_with_id(sensor_id);
@@ -114,15 +110,6 @@ sensor_value_t datamgr_get_avg(sensor_id_t sensor_id){
     avg = avg/RUN_AVG_LENGTH;
 
     return avg;
-}
-
-time_t datamgr_get_last_modified(sensor_id_t sensor_id){
-    sensor_t * element = datamgr_get_sensor_with_id(sensor_id);
-    return element->ts;
-}
-
-int datamgr_get_total_sensors(){
-    return dpl_size(sensor_list);
 }
 
 void *datamgr_get_sensor_with_id(sensor_id_t sensor_id){
