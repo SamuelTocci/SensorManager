@@ -12,6 +12,7 @@
 #include "config.h"
 #include "lib/dplist.h"
 #include "sbuffer.h"
+#include "errmacros.h"
 
 void * element_copy(void * element){
     sensor_t* copy = malloc(sizeof (sensor_t));
@@ -39,7 +40,7 @@ dplist_t * sensor_list;
 void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
     room_id_t curr_room;
     sensor_id_t curr_sensor;
-    //TODO: add catch if files are not opened correctly
+    FILE_OPEN_ERROR(fp_sensor_map);
     sensor_list = dpl_create(element_copy, element_free, element_compare);
     while (fscanf(fp_sensor_map, "%hu %hu", &curr_room, &curr_sensor)>0){
         sensor_t sensor;
@@ -64,7 +65,6 @@ void datamgr_parse_sensor_files(FILE *fp_sensor_map, sbuffer_t * sbuffer){
             } else {
                 element->ts = sensor_data->ts;
                 for (int i = 0; i < RUN_AVG_LENGTH; i++){ //find empty spot in run_value[]
-                    // printf("run_value: %f\n",element->run_value[i] );
                     if(element->run_value[RUN_AVG_LENGTH-1] != 0){
                         sensor_value_t avg = datamgr_get_avg(element->sensor_id);
                         if (avg <  SET_MIN_TEMP){
