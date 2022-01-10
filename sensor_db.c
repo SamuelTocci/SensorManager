@@ -37,9 +37,8 @@ DBCONN *init_connection(char clear_up_flag){
 	if (result != SQLITE_OK){
 		const char * send_buf = "Unable to connect to SQL server";
 		write_to_fifo(send_buf);
-		
 		sqlite3_close(conn);
-		return NULL;
+		exit(EXIT_FAILURE);
 	} else {
 		const char * send_buf = "Connection to SQL server established";
 		write_to_fifo(send_buf);

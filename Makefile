@@ -65,5 +65,16 @@ valgrind: sensor_gateway sensor_node
 	rm LOGFIFO
 	valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=20 --track-fds=yes ./sensor_gateway 5678
 
+scalability : sensor_gateway sensor_node
+	-- ./sensor_gateway 5678 &
+	-- ./sensor_node 15 1 127.0.0.1 5678 &
+	-- ./sensor_node 21 2 127.0.0.1 5678 &
+	-- ./sensor_node 37 3 127.0.0.1 5678 &
+	-- ./sensor_node 49 4 127.0.0.1 5678 &
+	-- ./sensor_node 112 6 127.0.0.1 5678 &
+	-- ./sensor_node 28 7 127.0.0.1 5678 &
+	-- ./sensor_node 129 3 127.0.0.1 5678 &
+	@echo "All nodes are running"
+
 zip:
-	zip lab_final.zip main.c connmgr.c connmgr.h datamgr.c datamgr.h sbuffer.c sbuffer.h sensor_db.c sensor_db.h config.h errmacros.h lib/dplist.c lib/dplist.h lib/tcpsock.c lib/tcpsock.h
+	zip lab_final.zip code_review_checklist_r0800803.ods main.c connmgr.c connmgr.h datamgr.c datamgr.h sbuffer.c sbuffer.h sensor_db.c sensor_db.h config.h errmacros.h lib/dplist.c lib/dplist.h lib/tcpsock.c lib/tcpsock.h
