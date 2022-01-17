@@ -1,0 +1,234 @@
+/**
+ * \author Samuel Tocci
+ */
+
+#define _GNU_SOURCE
+
+#include "dplist.h"
+#include <check.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+
+typedef struct {
+    int id;
+    char* name;
+} my_element_t;
+
+void* element_copy(void * element);
+void element_free(void ** element);
+int element_compare(void * x, void * y);
+
+void * element_copy(void * element) {
+    my_element_t* copy = malloc(sizeof (my_element_t));
+    assert(copy != NULL);
+    copy->id = ((my_element_t*)element)->id;
+    copy->name = ((my_element_t*)element)->name;
+    return (void *) copy;
+}
+
+void element_free(void ** element) {
+    free(*element);
+    *element = NULL;
+}
+
+int element_compare(void * x, void * y) {
+    return ((((my_element_t*)x)->id < ((my_element_t*)y)->id) ? -1 : (((my_element_t*)x)->id == ((my_element_t*)y)->id) ? 0 : 1);
+}
+
+void setup(void) {
+    // Implement pre-test setup
+}
+
+void teardown(void) {
+    // Implement post-test teardown
+}
+START_TEST(test_ListFree)
+    {
+        int test = 5;
+        int * test_ptr = &test;
+        // Test free NULL, don't use callback
+        dplist_t *list = NULL;
+        dpl_free(&list, false);
+        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+
+        // Test free NULL, use callback
+        list = NULL;
+        dpl_free(&list, true);
+        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+
+        // Test free empty list, don't use callback
+        list = dpl_create(element_copy, element_free, element_compare);
+        dpl_free(&list, false);
+        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+
+        // Test free empty list, use callback
+        list = dpl_create(element_copy, element_free, element_compare);
+        dpl_free(&list, true);
+        ck_assert_msg(list == NULL,"Failure: expected result to be NULL" );
+
+        // TODO : Test free with one element, also test if inserted elements are set to NULL
+        list = dpl_create(element_copy, element_free, element_compare);
+        my_element_t *dummy = malloc(sizeof(my_element_t)); 
+        dpl_insert_at_index(list,dummy,-1, false);
+        dpl_free(&list, true);
+        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+
+        // TODO : Test free with multiple elements, also test if inserted elements are set to NULL
+        list = dpl_create(element_copy, element_free, element_compare);
+        my_element_t *dummy1 = malloc(sizeof(my_element_t));
+        my_element_t *dummy2 = malloc(sizeof(my_element_t));
+        my_element_t *dummy3 = malloc(sizeof(my_element_t));
+        dpl_insert_at_index(list, dummy1, 0, false); 
+        dpl_insert_at_index(list, dummy2, 1, false);
+        dpl_insert_at_index(list, dummy3, 2, false);
+        dpl_free(&list, true);
+        ck_assert_msg(list == NULL, "Failure: expected result to be NULL");
+    }
+END_TEST
+
+START_TEST(test_ListInsertAtIndexListNULL)
+    {
+        my_element_t * test_ptr0 = malloc(sizeof(my_element_t));
+        test_ptr0->id = 5;
+        test_ptr0->name = "ptr 0";
+        my_element_t * test_ptr1 = malloc(sizeof(my_element_t));
+        test_ptr1->id = 25;
+        test_ptr1->name = "ptr 1";
+        dplist_t * list = dpl_create(element_copy, element_free, element_compare);
+        dpl_insert_at_index(list, test_ptr1, 0, false);
+        dpl_insert_at_index(list, test_ptr0, 1, false);
+        dpl_insert_at_index(list, test_ptr1, 2, true);
+
+        dpl_remove_at_index(list, 99, true);
+        dpl_remove_at_index(list, -1, true); 
+        dpl_remove_at_index(list, 0, true);
+
+        my_element_t * result_el = dpl_get_element_at_index(list, 1);
+        if(result_el != NULL) printf("element at index: %s\n",result_el->name );
+
+        int size = dpl_size(list);
+        printf("size: %i\n",size);
+        dpl_free(&list,true);
+
+        ck_assert_msg(size == 0, "Failure: expected list to be 0");
+        // int index = dpl_get_index_of_element(list, test_ptr0);
+        // printf("index of element: %i\n",index );
+
+        // my_element_t * result_ptr = dpl_get_element_at_index(list,-1);
+        // printf("%s\n",result_ptr->name);
+
+        // result_ptr = dpl_get_element_at_reference(list,dpl_get_reference_at_index(list, 0));
+        // printf("%s\n",result_ptr->name);
+
+    }
+END_TEST
+
+START_TEST(test_ListRemoveAtIndexListNull)
+    {
+        dplist_t * list = NULL;
+        dplist_t * result;
+        result = dpl_remove_at_index(list, -1, false);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+
+        result = dpl_remove_at_index(list, -1, false);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+
+        result = dpl_remove_at_index(list, 0, false);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+
+        result = dpl_remove_at_index(list, 99, false);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+
+        result = dpl_remove_at_index(list, 1, true);
+        ck_assert_msg(result == NULL, "Failure: expected list to be NULL");
+    }
+END_TEST
+
+START_TEST(test_ListRemoveAtIndexListEmpty)
+    {
+        dplist_t * list = dpl_create(element_copy, element_free, element_compare);
+        dplist_t * result;
+        result = dpl_remove_at_index(list, -1, false);
+        ck_assert_msg(result == list, "Failure: expected list to remain the same");
+
+        result = dpl_remove_at_index(list, 0, false);
+        ck_assert_msg(result == list, "Failure: expected list to remain the same");
+
+        result = dpl_remove_at_index(list, 99, false);
+        ck_assert_msg(result == list, "Failure: expected list to remain the same");
+
+        result = dpl_remove_at_index(list, 1, true);
+        ck_assert_msg(result == list, "Failure: expected list to remain the same");
+    }
+END_TEST
+
+START_TEST(test_ListProf)
+    {
+        dplist_t * list = dpl_create(element_copy, element_free, element_compare);
+
+        my_element_t * a = malloc(sizeof(my_element_t));
+        a->name = "x";
+        my_element_t * b = malloc(sizeof(my_element_t));
+        b->name = "y";
+        my_element_t * c = malloc(sizeof(my_element_t));
+        c->name = "z";
+
+        list = dpl_remove_at_index(list,0,false);
+
+        int size = dpl_size(list);
+        printf("before insert a on 0: %i\n",size );
+        list = dpl_insert_at_index(list,a,0,false); //val
+        size = dpl_size(list);
+        printf("before insert b on 5: %i\n",size );
+        list = dpl_insert_at_index(list,b,5,false);
+        size = dpl_size(list);
+        printf("before insert c on -1: %i\n",size );
+        list = dpl_insert_at_index(list,c,-1,false);
+
+        size = dpl_size(list);
+        printf("before remove on -10: %i\n",size );
+        list = dpl_remove_at_index(list,-10,true); //removing
+        //free(c);
+        size = dpl_size(list);
+        printf("before remove on 7: %i\n",size );
+        list = dpl_remove_at_index(list,7,true); //size becomes 0 should be 1
+        //free(b);
+        size = dpl_size(list);
+        printf("before remove on 7: %i\n",size );
+        list = dpl_remove_at_index(list,7,true);
+
+        size = dpl_size(list); //segmentation fault op lege list
+        printf("end: %i\n",size );
+
+        dpl_free(&list, true);
+        ck_assert_msg(size == 0, "Failure: after inserting 3 elements and removing them expected size to be 0 but was %d\n",size);
+    }
+END_TEST
+
+//START_TEST(test_nameOfYourTest)
+//  Add other testcases here...
+//END_TEST
+
+int main(void) {
+    Suite *s1 = suite_create("LIST_EX3");
+    TCase *tc1_1 = tcase_create("Core");
+    SRunner *sr = srunner_create(s1);
+    int nf;
+
+    suite_add_tcase(s1, tc1_1);
+    tcase_add_checked_fixture(tc1_1, setup, teardown);
+    // tcase_add_test(tc1_1, test_ListFree);
+    // tcase_add_test(tc1_1, test_ListInsertAtIndexListNULL);
+    // tcase_add_test(tc1_1, test_ListRemoveAtIndexListNull);
+    // tcase_add_test(tc1_1, test_ListRemoveAtIndexListEmpty);
+    tcase_add_test(tc1_1, test_ListProf);
+    // Add other tests here...
+
+    srunner_run_all(sr, CK_VERBOSE);
+
+    nf = srunner_ntests_failed(sr);
+    srunner_free(sr);
+
+    return nf == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+}
